@@ -1,7 +1,7 @@
 class_name Game
 extends RefCounted
 
-const DURATION := 1000 * 60 * 10
+const DURATION := 60 * 10
 
 var ball: Ball
 var goals: Array[Goal] = [Goal.new(Vector3(0, 0, -999)), Goal.new(Vector3(0, 0, 999))]
