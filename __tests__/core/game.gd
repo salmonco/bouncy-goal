@@ -23,46 +23,87 @@ func test_게임이_시작하면_공_위치가_초기화된다() -> void:
     game.start()
     assert_vector(game.ball.position).is_equal(Vector3.ZERO)
 
-func test_공이_골대_영역에_있으면_골이다() -> void:
+func test_공이_윗_골대_영역에_있으면_골이다() -> void:
     var game := Game.new()
-    var target := game.goals[0]
-    game.ball.position = target.position
+    var forward_goal := game.goals[0]
+    game.ball.position = forward_goal.position
     assert_bool(game.is_goal()).is_true()
-    game.ball.position = target.position + Vector3.FORWARD * 10
+    game.ball.position = forward_goal.position + Vector3.FORWARD * 10
     assert_bool(game.is_goal()).is_true()
-    game.ball.position = target.position + Vector3.FORWARD * 10 + Vector3.LEFT * Goal.WIDTH / 3
+    game.ball.position = forward_goal.position + Vector3.FORWARD * 10 + Vector3.LEFT * Goal.WIDTH / 3
     assert_bool(game.is_goal()).is_true()
-    game.ball.position = target.position + Vector3.FORWARD * 10 + Vector3.RIGHT * Goal.WIDTH / 3
+    game.ball.position = forward_goal.position + Vector3.FORWARD * 10 + Vector3.RIGHT * Goal.WIDTH / 3
     assert_bool(game.is_goal()).is_true()
 
-func test_공이_골대_영역_밖에_있으면_골이_아니다() -> void:
+func test_공이_아랫_골대_영역에_있으면_골이다() -> void:
     var game := Game.new()
-    var target := game.goals[0]
-    game.ball.position = target.position + Vector3.LEFT * Goal.WIDTH / 2
+    var back_goal := game.goals[1]
+    game.ball.position = back_goal.position
+    assert_bool(game.is_goal()).is_true()
+    game.ball.position = back_goal.position + Vector3.BACK * 10
+    assert_bool(game.is_goal()).is_true()
+    game.ball.position = back_goal.position + Vector3.BACK * 10 + Vector3.LEFT * Goal.WIDTH / 3
+    assert_bool(game.is_goal()).is_true()
+    game.ball.position = back_goal.position + Vector3.BACK * 10 + Vector3.RIGHT * Goal.WIDTH / 3
+    assert_bool(game.is_goal()).is_true()
+
+func test_공이_윗_골대_영역_밖에_있으면_골이_아니다() -> void:
+    var game := Game.new()
+    var forward_goal := game.goals[0]
+    game.ball.position = forward_goal.position + Vector3.LEFT * Goal.WIDTH / 2
     assert_bool(game.is_goal()).is_false()
-    game.ball.position = target.position + Vector3.RIGHT * Goal.WIDTH / 2
+    game.ball.position = forward_goal.position + Vector3.RIGHT * Goal.WIDTH / 2
     assert_bool(game.is_goal()).is_false()
-    game.ball.position = target.position + Vector3.BACK * 10
+    game.ball.position = forward_goal.position + Vector3.BACK * 10
     assert_bool(game.is_goal()).is_false()
-    game.ball.position = target.position + Vector3.BACK * 10 + Vector3.LEFT * Goal.WIDTH
+    game.ball.position = forward_goal.position + Vector3.BACK * 10 + Vector3.LEFT * Goal.WIDTH
     assert_bool(game.is_goal()).is_false()
-    game.ball.position = target.position + Vector3.BACK * 10 + Vector3.RIGHT * Goal.WIDTH
+    game.ball.position = forward_goal.position + Vector3.BACK * 10 + Vector3.RIGHT * Goal.WIDTH
     assert_bool(game.is_goal()).is_false()
-    game.ball.position = target.position + Vector3.FORWARD * 10 + Vector3.LEFT * Goal.WIDTH
+    game.ball.position = forward_goal.position + Vector3.FORWARD * 10 + Vector3.LEFT * Goal.WIDTH
     assert_bool(game.is_goal()).is_false()
-    game.ball.position = target.position + Vector3.FORWARD * 10 + Vector3.RIGHT * Goal.WIDTH
+    game.ball.position = forward_goal.position + Vector3.FORWARD * 10 + Vector3.RIGHT * Goal.WIDTH
     assert_bool(game.is_goal()).is_false()
 
-func test_골대에_공이_들어가면_점수가_오른다() -> void:
+func test_공이_아랫_골대_영역_밖에_있으면_골이_아니다() -> void:
+    var game := Game.new()
+    var back_goal := game.goals[1]
+    game.ball.position = back_goal.position + Vector3.LEFT * Goal.WIDTH / 2
+    assert_bool(game.is_goal()).is_false()
+    game.ball.position = back_goal.position + Vector3.RIGHT * Goal.WIDTH / 2
+    assert_bool(game.is_goal()).is_false()
+    game.ball.position = back_goal.position + Vector3.FORWARD * 10
+    assert_bool(game.is_goal()).is_false()
+    game.ball.position = back_goal.position + Vector3.FORWARD * 10 + Vector3.LEFT * Goal.WIDTH
+    assert_bool(game.is_goal()).is_false()
+    game.ball.position = back_goal.position + Vector3.FORWARD * 10 + Vector3.RIGHT * Goal.WIDTH
+    assert_bool(game.is_goal()).is_false()
+    game.ball.position = back_goal.position + Vector3.BACK * 10 + Vector3.LEFT * Goal.WIDTH
+    assert_bool(game.is_goal()).is_false()
+    game.ball.position = back_goal.position + Vector3.BACK * 10 + Vector3.RIGHT * Goal.WIDTH
+    assert_bool(game.is_goal()).is_false()
+
+func test_윗_골대에_공이_들어가면_점수가_오른다() -> void:
     var game := Game.new()
     game.start()
-    var target := game.goals[0]
-    game.ball.position = target.position
+    var forward_goal := game.goals[0]
+    game.ball.position = forward_goal.position
     game.tick(0.1)
-    assert_int(target.score).is_equal(1)
-    game.ball.position = target.position
+    assert_int(forward_goal.score).is_equal(1)
+    game.ball.position = forward_goal.position
     game.tick(0.1)
-    assert_int(target.score).is_equal(2)
+    assert_int(forward_goal.score).is_equal(2)
+
+func test_아랫_골대에_공이_들어가면_점수가_오른다() -> void:
+    var game := Game.new()
+    game.start()
+    var back_goal := game.goals[1]
+    game.ball.position = back_goal.position
+    game.tick(0.1)
+    assert_int(back_goal.score).is_equal(1)
+    game.ball.position = back_goal.position
+    game.tick(0.1)
+    assert_int(back_goal.score).is_equal(2)
 
 func test_골을_넣으면_공의_위치가_리셋된다() -> void:
     var game := Game.new()

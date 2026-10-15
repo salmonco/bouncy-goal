@@ -4,30 +4,42 @@ extends RefCounted
 const DURATION := 1000 * 60 * 10
 
 var ball: Ball
-var goals: Array[Goal]
+var goals: Array[Goal] = [Goal.new(Vector3(0, 0, -999)), Goal.new(Vector3(0, 0, 999))]
 var characters: Array[Character]
 var status: StringName = GameStatus.WAITING
+
 var _elapsed_time: float = 0.0
+var _forward_goal := goals[0]
+var _back_goal := goals[1]
 
 func _init(_character: Array[Character] = []) -> void:
     ball = Ball.new()
-    goals = [Goal.new(Vector3(0, 0, -999)), Goal.new(Vector3(0, 0, 999))]
     characters = _character
 
 func tick(delta: float) -> void:
     if status == GameStatus.WAITING:
         return
     _elapsed_time += delta
-    if is_goal():
-        goals[0].score += 1
-        ball.position = Ball.POSITION
     if _elapsed_time > DURATION:
         status = GameStatus.OVER
+    if _is_forward_goal():
+        _forward_goal.score += 1
+    if _is_back_goal():
+        _back_goal.score += 1
+    if is_goal():
+        ball.position = Ball.POSITION
 
 func start() -> void:
     ball.position = Vector3.ZERO
     status = GameStatus.PLAYING
 
 func is_goal() -> bool:
-    var to_goal := goals[0].position - ball.position
-    return ball.position.distance_to(goals[0].position) < Goal.WIDTH / 2 and not Vector3.FORWARD.dot(to_goal) > 0
+    return _is_forward_goal() or _is_back_goal()
+
+func _is_forward_goal() -> bool:
+    var to_forward_goal := _forward_goal.position - ball.position
+    return ball.position.distance_to(_forward_goal.position) < Goal.WIDTH / 2 and not Vector3.FORWARD.dot(to_forward_goal) > 0
+
+func _is_back_goal() -> bool:
+    var to_back_goal := _back_goal.position - ball.position
+    return ball.position.distance_to(_back_goal.position) < Goal.WIDTH / 2 and not Vector3.BACK.dot(to_back_goal) > 0
