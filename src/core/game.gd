@@ -17,7 +17,7 @@ func _init(_character: Array[Character] = []) -> void:
     characters = _character
 
 func tick(delta: float) -> void:
-    if status == GameStatus.WAITING:
+    if status == GameStatus.WAITING or status == GameStatus.OVER:
         return
     _elapsed_time += delta
     if _elapsed_time > DURATION:

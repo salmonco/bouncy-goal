@@ -132,3 +132,15 @@ func test_게임_시작_전이면_시간이_흘러도_게임이_종료되지_않
     var game := Game.new()
     game.tick(Game.DURATION * 2)
     assert_str(game.status).is_not_equal(GameStatus.OVER)
+
+func test_게임이_종료되면_골을_넣어도_점수가_오르지_않는다() -> void:
+    var game := Game.new()
+    game.start()
+    var forward_goal := game.goals[0]
+    game.ball.position = forward_goal.position
+    game.tick(0.1)
+    assert_int(forward_goal.score).is_equal(1)
+    game.tick(Game.DURATION * 2)
+    game.ball.position = forward_goal.position
+    game.tick(0.1)
+    assert_int(forward_goal.score).is_equal(1)
