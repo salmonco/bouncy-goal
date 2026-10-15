@@ -1,3 +1,53 @@
-[gd_scene format=3]
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/game/main.gd" id="1_main"]
+
+[sub_resource type="Environment" id="Environment_sky"]
+background_mode = 1
+background_color = Color(0.55, 0.75, 0.92, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Material_grass"]
+albedo_color = Color(0.27, 0.58, 0.3, 1)
+
+[sub_resource type="PlaneMesh" id="Mesh_field"]
+material = SubResource("Material_grass")
+size = Vector2(600, 2000)
+
+[sub_resource type="BoxMesh" id="Mesh_center_line"]
+size = Vector3(600, 0.5, 4)
 
 [node name="Main" type="Node3D"]
+script = ExtResource("1_main")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_sky")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+shadow_enabled = true
+directional_shadow_max_distance = 4000.0
+
+[node name="Camera3D" type="Camera3D" parent="."]
+position = Vector3(0, 1600, 1800)
+fov = 45.0
+far = 6000.0
+
+[node name="Field" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_field")
+
+[node name="CenterLine" type="MeshInstance3D" parent="Field"]
+position = Vector3(0, 0.25, 0)
+mesh = SubResource("Mesh_center_line")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Score" type="Label" parent="HUD"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 16.0
+offset_bottom = 56.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
