@@ -55,5 +55,13 @@ func test_골대에_공이_들어가면_점수가_오른다() -> void:
     game.ball.position = target.position
     game.tick(0.1)
     assert_int(target.score).is_equal(1)
+    game.ball.position = target.position
     game.tick(0.1)
     assert_int(target.score).is_equal(2)
+
+func test_골을_넣으면_공의_위치가_리셋된다() -> void:
+    var game := Game.new()
+    var target := game.goals[0]
+    game.ball.position = target.position
+    game.tick(0.1)
+    assert_vector(game.ball.position).is_equal(Ball.POSITION)

@@ -13,6 +13,7 @@ func _init(_character: Array[Character] = []) -> void:
 func tick(delta: float) -> void:
     if is_goal():
         goals[0].score += 1
+        ball.position = Ball.POSITION
 
 func start() -> void:
     ball.position = Vector3.ZERO
