@@ -1,7 +1,7 @@
 class_name Game
 extends RefCounted
 
-const DURATION := 60 * 10
+const DURATION: float = 60 * 10
 
 var ball: Ball
 var goals: Array[Goal] = [Goal.new(Vector3(0, 0, -999)), Goal.new(Vector3(0, 0, 999))]
@@ -43,3 +43,6 @@ func _is_forward_goal() -> bool:
 func _is_back_goal() -> bool:
     var to_back_goal := _back_goal.position - ball.position
     return ball.position.distance_to(_back_goal.position) < Goal.WIDTH / 2 and not Vector3.BACK.dot(to_back_goal) > 0
+
+func remaining_time() -> float:
+    return DURATION - _elapsed_time

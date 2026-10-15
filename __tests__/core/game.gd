@@ -144,3 +144,12 @@ func test_게임이_종료되면_골을_넣어도_점수가_오르지_않는다(
     game.ball.position = forward_goal.position
     game.tick(0.1)
     assert_int(forward_goal.score).is_equal(1)
+
+func test_게임을_시작하면_남은_시간이_계산된다() -> void:
+    var game := Game.new()
+    assert_float(game.remaining_time()).is_equal(Game.DURATION)
+    game.start()
+    game.tick(0.1)
+    assert_float(game.remaining_time()).is_equal(Game.DURATION - 0.1)
+    game.tick(0.1)
+    assert_float(game.remaining_time()).is_equal(Game.DURATION - 0.1 * 2)
