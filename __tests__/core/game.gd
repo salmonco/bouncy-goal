@@ -13,6 +13,10 @@ func test_게임이_초기화될_때_캐릭터가_들어간다() -> void:
     var game := Game.new(characters)
     assert_that(game.characters).is_equal(characters)
 
+func test_게임이_초기화되면_상태가_대기_상태다() -> void:
+    var game := Game.new()
+    assert_str(game.status).is_equal(GameStatus.WAITING)
+
 func test_게임이_시작하면_공_위치가_초기화된다() -> void:
     var game := Game.new()
     game.ball.position = Vector3.FORWARD
@@ -51,6 +55,7 @@ func test_공이_골대_영역_밖에_있으면_골이_아니다() -> void:
 
 func test_골대에_공이_들어가면_점수가_오른다() -> void:
     var game := Game.new()
+    game.start()
     var target := game.goals[0]
     game.ball.position = target.position
     game.tick(0.1)
@@ -61,7 +66,28 @@ func test_골대에_공이_들어가면_점수가_오른다() -> void:
 
 func test_골을_넣으면_공의_위치가_리셋된다() -> void:
     var game := Game.new()
+    game.start()
     var target := game.goals[0]
     game.ball.position = target.position
     game.tick(0.1)
     assert_vector(game.ball.position).is_equal(Ball.POSITION)
+
+func test_게임이_시작되면_상태가_플레이_중으로_바뀐다() -> void:
+    var game := Game.new()
+    game.start()
+    assert_str(game.status).is_equal(GameStatus.PLAYING)
+
+func test_제한_시간이_지나면_게임이_종료된다() -> void:
+    var game := Game.new()
+    game.start()
+    game.tick(0.1)
+    assert_str(game.status).is_not_equal(GameStatus.OVER)
+    game.tick(0.1)
+    assert_str(game.status).is_not_equal(GameStatus.OVER)
+    game.tick(Game.DURATION * 2)
+    assert_str(game.status).is_equal(GameStatus.OVER)
+
+func test_게임_시작_전이면_시간이_흘러도_게임이_종료되지_않는다() -> void:
+    var game := Game.new()
+    game.tick(Game.DURATION * 2)
+    assert_str(game.status).is_not_equal(GameStatus.OVER)
