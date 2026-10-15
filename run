@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# 게임 실행 단축기. bin/run.sh 로 그대로 넘깁니다.
+#
+#   ./run                            # 게임 실행 (main_scene)
+#   ./run scenes/main.tscn         # 특정 씬만
+#   ./run -e                         # Godot 에디터 열기
+#   ./run -h                         # 사용법
+exec "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/bin/run.sh" "$@"
