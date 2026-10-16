@@ -10,9 +10,14 @@ var facing: Vector3
 var move_input: Vector3 = Vector3.ZERO
 var speed: float = SPEED
 
+var _start_position: Vector3
+var _start_facing: Vector3
+
 func _init(_position = Vector3.ZERO, _facing = Vector3.FORWARD) -> void:
     position = _position
     facing = _facing
+    _start_position = _position
+    _start_facing = _facing
 
 func bounce(ball: Ball) -> bool:
     var to_ball := ball.position - position
@@ -29,6 +34,11 @@ func world_move_direction() -> Vector3:
 
 func move(delta: float) -> void:
     position += world_move_direction() * speed * delta
+
+func reset() -> void:
+    position = _start_position
+    facing = _start_facing
+    move_input = Vector3.ZERO
 
 func turn(angle: float) -> void:
     facing = facing.rotated(Vector3.UP, angle).normalized()

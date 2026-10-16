@@ -4,6 +4,7 @@ extends RefCounted
 const DURATION: float = 60 * 10
 const FIELD_WIDTH: float = 800
 const FIELD_LENGTH: float = 2000
+const GOAL_PAUSE: float = 2.0
 
 var ball: Ball
 var goals: Array[Goal] = [Goal.new(Vector3.FORWARD * FIELD_LENGTH / 2), Goal.new(Vector3.BACK * FIELD_LENGTH / 2)]
@@ -11,6 +12,7 @@ var characters: Array[Character]
 var status: StringName = GameStatus.WAITING
 
 var _elapsed_time: float = 0.0
+var _goal_pause_remaining: float = 0.0
 var _forward_goal := goals[0]
 var _back_goal := goals[1]
 
@@ -24,27 +26,44 @@ func tick(delta: float) -> void:
     _elapsed_time += delta
     if _elapsed_time > DURATION:
         status = GameStatus.OVER
-    if _is_forward_goal():
-        _forward_goal.score += 1
-    if _is_back_goal():
-        _back_goal.score += 1
-    if is_goal():
-        ball.reset()
+        return
+    if status == GameStatus.GOAL:
+        _goal_pause_remaining -= delta
+        if _goal_pause_remaining <= 0:
+            _kickoff()
+            return
+    else:
+        if _is_forward_goal():
+            _forward_goal.score += 1
+        if _is_back_goal():
+            _back_goal.score += 1
+        if is_goal():
+            status = GameStatus.GOAL
+            _goal_pause_remaining = GOAL_PAUSE
     for character in characters:
         character.move(delta)
         character.position.x = clamp(character.position.x, -FIELD_WIDTH / 2, FIELD_WIDTH / 2)
         character.position.z = clamp(character.position.z, -FIELD_LENGTH / 2, FIELD_LENGTH / 2)
+    var was_past_goal_line := absf(ball.position.z) > FIELD_LENGTH / 2
     ball.move(delta)
-    if ball.position.x > FIELD_WIDTH / 2 or ball.position.x < -FIELD_WIDTH / 2:
+    var half_width := Goal.WIDTH / 2 if was_past_goal_line else FIELD_WIDTH / 2
+    if absf(ball.position.x) > half_width:
         ball.velocity.x = -ball.velocity.x
-        ball.position.x = clamp(ball.position.x, -FIELD_WIDTH / 2, FIELD_WIDTH / 2)
-    var is_in_goal_mouth := absf(ball.position.x) < Goal.WIDTH / 2
-    if not is_in_goal_mouth and (ball.position.z > FIELD_LENGTH / 2 or ball.position.z < -FIELD_LENGTH / 2):
+        ball.position.x = clamp(ball.position.x, -half_width, half_width)
+    var is_within_goal_width := absf(ball.position.x) <= Goal.WIDTH / 2
+    var half_length := FIELD_LENGTH / 2 + Goal.DEPTH if is_within_goal_width else FIELD_LENGTH / 2
+    if absf(ball.position.z) > half_length:
         ball.velocity.z = -ball.velocity.z
-        ball.position.z = clamp(ball.position.z, -FIELD_LENGTH / 2, FIELD_LENGTH / 2)
+        ball.position.z = clamp(ball.position.z, -half_length, half_length)
 
 func start() -> void:
     ball.reset()
+    status = GameStatus.PLAYING
+
+func _kickoff() -> void:
+    ball.reset()
+    for character in characters:
+        character.reset()
     status = GameStatus.PLAYING
 
 func is_goal() -> bool:

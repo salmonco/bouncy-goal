@@ -94,6 +94,7 @@ func test_윗_골대에_공이_들어가면_점수가_오른다() -> void:
     game.ball.position = forward_goal.position
     game.tick(0.1)
     assert_int(forward_goal.score).is_equal(1)
+    game.tick(Game.GOAL_PAUSE)
     game.ball.position = forward_goal.position
     game.tick(0.1)
     assert_int(forward_goal.score).is_equal(2)
@@ -105,19 +106,94 @@ func test_아랫_골대에_공이_들어가면_점수가_오른다() -> void:
     game.ball.position = back_goal.position
     game.tick(0.1)
     assert_int(back_goal.score).is_equal(1)
+    game.tick(Game.GOAL_PAUSE)
     game.ball.position = back_goal.position
     game.tick(0.1)
     assert_int(back_goal.score).is_equal(2)
 
-func test_골을_넣으면_공의_위치와_속도가_초기화된다() -> void:
+func test_골을_넣으면_골_상태가_된다() -> void:
     var game := Game.new()
     game.start()
-    var target := game.goals[0]
-    game.ball.position = target.position
+    game.ball.position = game.goals[0].position
+    game.tick(0.1)
+    assert_str(game.status).is_equal(GameStatus.GOAL)
+
+func test_골_상태에서는_점수가_더_오르지_않는다() -> void:
+    var game := Game.new()
+    game.start()
+    var forward_goal := game.goals[0]
+    game.ball.position = forward_goal.position
+    game.tick(0.1)
+    game.tick(0.1)
+    game.tick(0.1)
+    assert_int(forward_goal.score).is_equal(1)
+
+func test_골_상태에서도_공과_캐릭터는_움직인다() -> void:
+    var player := Character.new(Vector3(0, 0, 300), Vector3.FORWARD)
+    var characters: Array[Character] = [player]
+    var game := Game.new(characters)
+    game.start()
+    game.ball.position = game.goals[0].position
+    game.tick(0.1)
+    var ball_position := game.ball.position
+    var player_position := player.position
+    game.ball.velocity = Vector3.FORWARD * 100
+    player.move_input = Vector3.FORWARD
+    game.tick(0.1)
+    assert_vector(game.ball.position).is_not_equal(ball_position)
+    assert_vector(player.position).is_not_equal(player_position)
+
+func test_공은_골망_뒤로_빠져나가지_않는다() -> void:
+    var game := Game.new()
+    game.start()
+    game.ball.position = Vector3(0, 0, -(Game.FIELD_LENGTH / 2 + Goal.DEPTH - 1))
+    game.ball.velocity = Vector3.FORWARD * 100
+    game.tick(0.1)
+    assert_float(game.ball.position.z).is_greater_equal(-(Game.FIELD_LENGTH / 2 + Goal.DEPTH))
+    assert_float(game.ball.velocity.z).is_greater(0)
+
+func test_공은_골망_옆으로_빠져나가지_않는다() -> void:
+    var game := Game.new()
+    game.start()
+    game.ball.position = Vector3(Goal.WIDTH / 2 - 1, 0, -(Game.FIELD_LENGTH / 2 + 10))
+    game.ball.velocity = Vector3.RIGHT * 100
+    game.tick(0.1)
+    assert_float(game.ball.position.x).is_less_equal(Goal.WIDTH / 2)
+    assert_float(game.ball.position.z).is_less(-Game.FIELD_LENGTH / 2)
+
+func test_골_상태가_끝나기_전에는_리셋되지_않는다() -> void:
+    var game := Game.new()
+    game.start()
+    var forward_goal := game.goals[0]
+    game.ball.position = forward_goal.position
+    game.tick(0.1)
+    game.tick(Game.GOAL_PAUSE / 2)
+    assert_str(game.status).is_equal(GameStatus.GOAL)
+    assert_vector(game.ball.position).is_equal(forward_goal.position)
+
+func test_골을_넣으면_잠시_뒤에_공과_캐릭터가_처음_위치로_돌아간다() -> void:
+    var player := Character.new(Vector3(0, 0, 300), Vector3.FORWARD)
+    var characters: Array[Character] = [player]
+    var game := Game.new(characters)
+    game.start()
+    player.position = Vector3(100, 0, 100)
+    player.facing = Vector3.RIGHT
+    game.ball.position = game.goals[0].position
     game.ball.velocity = Vector3.FORWARD
     game.tick(0.1)
+    game.tick(Game.GOAL_PAUSE)
     assert_vector(game.ball.position).is_equal(Ball.POSITION)
     assert_vector(game.ball.velocity).is_equal(Vector3.ZERO)
+    assert_vector(player.position).is_equal(Vector3(0, 0, 300))
+    assert_vector(player.facing).is_equal(Vector3.FORWARD)
+
+func test_골_상태가_끝나면_다시_플레이_중이_된다() -> void:
+    var game := Game.new()
+    game.start()
+    game.ball.position = game.goals[0].position
+    game.tick(0.1)
+    game.tick(Game.GOAL_PAUSE)
+    assert_str(game.status).is_equal(GameStatus.PLAYING)
 
 func test_게임이_시작되면_상태가_플레이_중으로_바뀐다() -> void:
     var game := Game.new()

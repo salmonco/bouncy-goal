@@ -3,7 +3,6 @@ extends Node3D
 
 const POST_HEIGHT := 60.0
 const POST_THICKNESS := 5.0
-const NET_DEPTH := 40.0
 
 var goal: Goal
 
@@ -24,8 +23,8 @@ func _ready() -> void:
     crossbar.position = Vector3(0, POST_HEIGHT, 0)
     add_child(crossbar)
 
-    var net := Shapes.box(Vector3(Goal.WIDTH, POST_HEIGHT, NET_DEPTH), Color(1, 1, 1, 0.25))
-    net.position = Vector3(0, POST_HEIGHT / 2, outward * NET_DEPTH / 2)
+    var net := Shapes.box(Vector3(Goal.WIDTH, POST_HEIGHT, Goal.DEPTH), Color(1, 1, 1, 0.25))
+    net.position = Vector3(0, POST_HEIGHT / 2, outward * Goal.DEPTH / 2)
     add_child(net)
 
 func _process(_delta: float) -> void:

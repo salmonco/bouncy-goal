@@ -114,3 +114,13 @@ func test_캐릭터가_공을_튀기면_공의_속도가_바뀐다() -> void:
     ball.position = Vector3.FORWARD * 10
     character.bounce(ball)
     assert_vector(ball.velocity).is_equal(character.facing * Character.POWER)
+
+func test_캐릭터는_리셋하면_처음_위치와_방향으로_돌아간다() -> void:
+    var character := Character.new(Vector3(0, 0, 300), Vector3.FORWARD)
+    character.position = Vector3(100, 0, 100)
+    character.facing = Vector3.RIGHT
+    character.move_input = Vector3.FORWARD
+    character.reset()
+    assert_vector(character.position).is_equal(Vector3(0, 0, 300))
+    assert_vector(character.facing).is_equal(Vector3.FORWARD)
+    assert_vector(character.move_input).is_equal(Vector3.ZERO)

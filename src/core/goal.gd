@@ -2,6 +2,7 @@ class_name Goal
 extends RefCounted
 
 const WIDTH := 100.0
+const DEPTH := 40.0
 
 var position: Vector3
 var score: int = 0
