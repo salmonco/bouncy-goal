@@ -359,3 +359,14 @@ func test_캐릭터는_앞뒤_벽_밖으로_나가지_않는다() -> void:
     game.tick(0.1)
     assert_float(forward_player.position.z).is_equal(-Game.FIELD_LENGTH / 2)
     assert_float(back_player.position.z).is_equal(Game.FIELD_LENGTH / 2)
+
+func test_게임을_다시_시작하면_점수가_초기화된다() -> void:
+    var game := Game.new()
+    game.start()
+    var forward_goal := game.goals[0]
+    var back_goal := game.goals[1]
+    forward_goal.score = 1
+    back_goal.score = 2
+    game.start()
+    assert_int(forward_goal.score).is_equal(0)
+    assert_int(back_goal.score).is_equal(0)

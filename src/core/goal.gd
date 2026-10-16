@@ -9,3 +9,6 @@ var score: int = 0
 
 func _init(_position: Vector3) -> void:
     position = _position
+
+func reset() -> void:
+    score = 0

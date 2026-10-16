@@ -59,6 +59,8 @@ func tick(delta: float) -> void:
 func start() -> void:
     ball.reset()
     status = GameStatus.PLAYING
+    for goal in goals:
+        goal.reset()
 
 func _kickoff() -> void:
     ball.reset()
