@@ -32,6 +32,8 @@ func tick(delta: float) -> void:
         ball.reset()
     for character in characters:
         character.move(delta)
+        character.position.x = clamp(character.position.x, -FIELD_WIDTH / 2, FIELD_WIDTH / 2)
+        character.position.z = clamp(character.position.z, -FIELD_LENGTH / 2, FIELD_LENGTH / 2)
     ball.move(delta)
     if ball.position.x > FIELD_WIDTH / 2 or ball.position.x < -FIELD_WIDTH / 2:
         ball.velocity.x = -ball.velocity.x

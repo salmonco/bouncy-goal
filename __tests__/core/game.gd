@@ -259,3 +259,27 @@ func test_공이_골대_입구로_가면_벽에_튕기지_않고_골이_된다()
     assert_float(game.ball.velocity.z).is_less(0)
     game.tick(0.1)
     assert_int(forward_goal.score).is_equal(1)
+
+func test_캐릭터는_옆_벽_밖으로_나가지_않는다() -> void:
+    var right_player := Character.new(Vector3.RIGHT * (Game.FIELD_WIDTH / 2 - 1), Vector3.FORWARD)
+    var left_player := Character.new(Vector3.LEFT * (Game.FIELD_WIDTH / 2 - 1), Vector3.FORWARD)
+    var characters: Array[Character] = [right_player, left_player]
+    var game := Game.new(characters)
+    game.start()
+    right_player.move_input = Vector3.RIGHT
+    left_player.move_input = Vector3.LEFT
+    game.tick(0.1)
+    assert_float(right_player.position.x).is_equal(Game.FIELD_WIDTH / 2)
+    assert_float(left_player.position.x).is_equal(-Game.FIELD_WIDTH / 2)
+
+func test_캐릭터는_앞뒤_벽_밖으로_나가지_않는다() -> void:
+    var forward_player := Character.new(Vector3(200, 0, -(Game.FIELD_LENGTH / 2 - 1)), Vector3.FORWARD)
+    var back_player := Character.new(Vector3(200, 0, Game.FIELD_LENGTH / 2 - 1), Vector3.BACK)
+    var characters: Array[Character] = [forward_player, back_player]
+    var game := Game.new(characters)
+    game.start()
+    forward_player.move_input = Vector3.FORWARD
+    back_player.move_input = Vector3.FORWARD
+    game.tick(0.1)
+    assert_float(forward_player.position.z).is_equal(-Game.FIELD_LENGTH / 2)
+    assert_float(back_player.position.z).is_equal(Game.FIELD_LENGTH / 2)
