@@ -466,3 +466,43 @@ func _teams_with_seed(_seed: int) -> Array:
     game.rng.seed = _seed
     game.start()
     return game.characters.map(func(c): return c.team)
+
+func test_팀_점수는_상대_골대에_넣은_골_수다() -> void:
+    var game := Game.new(_characters(2))
+    game.start()
+    game.goal_of(0).score = 1
+    game.goal_of(1).score = 2
+    assert_int(game.score_of(0)).is_equal(2)
+    assert_int(game.score_of(1)).is_equal(1)
+
+func test_경기가_끝나지_않으면_승자는_없다() -> void:
+    var game := Game.new(_characters(2))
+    game.start()
+    game.goal_of(0).score = 1
+    game.goal_of(1).score = 2
+    assert_int(game.winner()).is_equal(Character.NO_TEAM)
+
+func test_경기가_끝나면_점수가_높은_팀이_이긴다() -> void:
+    var game := Game.new(_characters(2))
+    game.start()
+    game.goal_of(0).score = 1
+    game.goal_of(1).score = 2
+    game.tick(Game.DURATION * 2)
+    assert_int(game.winner()).is_equal(0)
+
+func test_경기가_끝났을_때_동점이면_무승부다() -> void:
+    var game := Game.new(_characters(2))
+    game.start()
+    game.goal_of(0).score = 1
+    game.goal_of(1).score = 1
+    game.tick(Game.DURATION * 2)
+    assert_int(game.winner()).is_equal(Character.NO_TEAM)
+
+func test_경기_중에는_승자가_없다() -> void:
+    var game := Game.new(_characters(2))
+    game.start()
+    game.goal_of(0).score = 1
+    game.goal_of(1).score = 2
+    assert_int(game.winner()).is_equal(Character.NO_TEAM)
+    game.tick(Game.DURATION / 2)
+    assert_int(game.winner()).is_equal(Character.NO_TEAM)

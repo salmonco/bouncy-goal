@@ -116,3 +116,16 @@ func _is_back_goal() -> bool:
 
 func remaining_time() -> float:
     return DURATION - _elapsed_time
+
+func score_of(team: int) -> int:
+    return opponent_goal_of(team).score
+
+func winner() -> int:
+    if status != GameStatus.OVER:
+        return Character.NO_TEAM
+    var teams := goals.map(func(g: Goal): return g.team)
+    var max_score: int = teams.map(func(team: int): return score_of(team)).max()
+    var leaders := teams.filter(func(team: int): return score_of(team) == max_score)
+    if leaders.size() > 1:
+        return Character.NO_TEAM
+    return leaders[0]
