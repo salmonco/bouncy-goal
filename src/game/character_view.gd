@@ -5,17 +5,21 @@ const RADIUS := 12.0
 const HEIGHT := 50.0
 
 var character: Character
-var color: Color
 
-func _init(_character: Character, _color: Color) -> void:
+# 팀은 game.start() 때마다 다시 정해지므로, 바뀌면 다시 칠합니다.
+var _painted_team: int = Character.NO_TEAM
+var _body_material: StandardMaterial3D
+var _range_material: StandardMaterial3D
+
+func _init(_character: Character) -> void:
     character = _character
-    color = _color
 
 func _ready() -> void:
     var capsule := CapsuleMesh.new()
     capsule.radius = RADIUS
     capsule.height = HEIGHT
-    var body := Shapes.mesh(capsule, color)
+    var body := Shapes.mesh(capsule, TeamColors.NO_TEAM_COLOR)
+    _body_material = capsule.material
     body.position.y = HEIGHT / 2
     add_child(body)
 
@@ -29,11 +33,21 @@ func _ready() -> void:
     disc.top_radius = Character.BOUNCE_RANGE
     disc.bottom_radius = Character.BOUNCE_RANGE
     disc.height = 0.5
-    var range_marker := Shapes.mesh(disc, Color(color, 0.3))
+    var range_marker := Shapes.mesh(disc, Color(TeamColors.NO_TEAM_COLOR, 0.3))
+    _range_material = disc.material
     range_marker.position.y = 0.5
     add_child(range_marker)
+    _paint()
 
 func _process(_delta: float) -> void:
+    if character.team != _painted_team:
+        _paint()
     position = character.position
     if character.facing != Vector3.ZERO:
         basis = Basis.looking_at(character.facing)
+
+func _paint() -> void:
+    var color := TeamColors.of(character.team)
+    _body_material.albedo_color = color
+    _range_material.albedo_color = Color(color, 0.3)
+    _painted_team = character.team

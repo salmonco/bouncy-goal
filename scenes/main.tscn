@@ -43,14 +43,15 @@ mesh = SubResource("Mesh_center_line")
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=121039988]
 
-[node name="Score" type="Label" parent="HUD" unique_id=181930563]
+[node name="Score" type="RichTextLabel" parent="HUD" unique_id=181930563]
 anchors_preset = 10
 anchor_right = 1.0
 offset_top = 16.0
 offset_bottom = 56.0
 grow_horizontal = 2
-theme_override_font_sizes/font_size = 32
-horizontal_alignment = 1
+theme_override_font_sizes/normal_font_size = 32
+bbcode_enabled = true
+scroll_active = false
 
 [node name="Message" type="Label" parent="HUD" unique_id=734501928]
 anchors_preset = 15

@@ -4,7 +4,7 @@ extends Node3D
 
 @onready var _camera: Camera3D = $Camera3D
 @onready var _sun: DirectionalLight3D = $Sun
-@onready var _score_label: Label = $HUD/Score
+@onready var _score_label: RichTextLabel = $HUD/Score
 @onready var _message_label: Label = $HUD/Message
 @onready var _field: MeshInstance3D = $Field
 @onready var _center_line: MeshInstance3D = $Field/CenterLine
@@ -35,10 +35,10 @@ func _ready() -> void:
     for goal in game.goals:
         add_child(GoalView.new(goal))
     # 1인칭이라 내 캐릭터는 카메라를 가리지 않게 숨깁니다.
-    var player_view := CharacterView.new(_player, Color.ROYAL_BLUE)
+    var player_view := CharacterView.new(_player)
     player_view.visible = false
     add_child(player_view)
-    add_child(CharacterView.new(_npc, Color.CRIMSON))
+    add_child(CharacterView.new(_npc))
     add_child(BallView.new(game.ball))
 
     game.start()
@@ -61,7 +61,12 @@ func _process(delta: float) -> void:
     _camera.position = _player.position + Vector3.UP * EYE_HEIGHT
     _camera.look_at(_camera.position + _player.facing)
     var opponent_team := game.opponent_goal_of(_player.team).team
-    _score_label.text = "나 %d : %d 상대   %s" % [game.score_of(_player.team), game.score_of(opponent_team), _format_time(game.remaining_time())]
+    # 1인칭이라 내 몸이 안 보이니, 점수를 각 팀 색으로 칠해 어느 편인지 알려줍니다.
+    _score_label.text = "[center][color=%s]나 %d[/color] : [color=%s]%d 상대[/color]   %s[/center]" % [
+        TeamColors.of(_player.team).to_html(false), game.score_of(_player.team),
+        TeamColors.of(opponent_team).to_html(false), game.score_of(opponent_team),
+        _format_time(game.remaining_time()),
+    ]
     _message_label.text = _message()
 
 func _message() -> String:

@@ -23,7 +23,8 @@ func _ready() -> void:
     crossbar.position = Vector3(0, POST_HEIGHT, 0)
     add_child(crossbar)
 
-    var net := Shapes.box(Vector3(Goal.WIDTH, POST_HEIGHT, Goal.DEPTH), Color(1, 1, 1, 0.25))
+    # 그물은 이 골대를 지키는 팀의 색입니다.
+    var net := Shapes.box(Vector3(Goal.WIDTH, POST_HEIGHT, Goal.DEPTH), Color(TeamColors.of(goal.team), 0.35))
     net.position = Vector3(0, POST_HEIGHT / 2, outward * Goal.DEPTH / 2)
     add_child(net)
 
