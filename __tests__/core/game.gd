@@ -183,3 +183,12 @@ func test_시간이_흐르면_캐릭터가_이동_방향으로_움직인다() ->
     player.move_input = Vector3.FORWARD
     game.tick(0.1)
     assert_vector(player.position).is_equal_approx(initial_position + player.world_move_direction() * Character.SPEED * 0.1, EPSILON)
+
+func test_시간이_흐르면_공이_움직인다() -> void:
+    var game := Game.new()
+    game.start()
+    game.ball.position = Vector3.FORWARD
+    game.ball.velocity = Vector3.FORWARD * 10
+    var initial_position := game.ball.position
+    game.tick(0.1)
+    assert_vector(game.ball.position).is_equal_approx(initial_position + game.ball.velocity * 0.1, EPSILON)

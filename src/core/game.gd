@@ -30,6 +30,7 @@ func tick(delta: float) -> void:
         ball.position = Ball.POSITION
     for character in characters:
         character.move(delta)
+    ball.move(delta)
 
 func start() -> void:
     ball.position = Vector3.ZERO
