@@ -75,6 +75,12 @@ func test_캐릭터는_이동_방향이_없으면_월드의_이동_방향_또한
     character.move_input = Vector3.ZERO
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.ZERO, EPSILON)
 
+func test_캐릭터가_시간에_따라_이동하면_위치가_바뀐다() -> void:
+    var character := Character.new()
+    var initial_position := character.position
+    character.move(0.1)
+    assert_vector(character.position).is_equal(initial_position + character.world_move_direction() * Character.SPEED * 0.1)
+
 func test_캐릭터는_회전해서_얼굴_방향을_바꿀_수_있다() -> void:
     var character := Character.new()
     character.facing = Vector3.FORWARD

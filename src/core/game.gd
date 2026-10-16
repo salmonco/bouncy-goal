@@ -29,7 +29,7 @@ func tick(delta: float) -> void:
     if is_goal():
         ball.position = Ball.POSITION
     for character in characters:
-        character.position += character.world_move_direction() * Character.SPEED * delta
+        character.move(delta)
 
 func start() -> void:
     ball.position = Vector3.ZERO

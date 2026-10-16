@@ -31,5 +31,8 @@ func world_move_direction() -> Vector3:
         return facing.rotated(Vector3.UP, deg_to_rad(-90))
     return Vector3.ZERO
 
+func move(delta: float) -> void:
+    position += world_move_direction() * Character.SPEED * delta
+
 func turn(angle: float) -> void:
     facing = facing.rotated(Vector3.UP, angle).normalized()
