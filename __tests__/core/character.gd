@@ -27,45 +27,45 @@ func test_공이_영역_안에_들어와도_캐릭터가_바라보는_방향이�
 
 func test_캐릭터는_이동_방향을_가진다() -> void:
     var character := Character.new()
-    assert_vector(character.move_direction).is_equal(Vector3.ZERO)
-    character.move_direction = Vector3.FORWARD
-    assert_vector(character.move_direction).is_equal(Vector3.FORWARD)
+    assert_vector(character.move_input).is_equal(Vector3.ZERO)
+    character.move_input = Vector3.FORWARD
+    assert_vector(character.move_input).is_equal(Vector3.FORWARD)
 
 func test_캐릭터는_얼굴_방향_기준으로_월드에서의_이동_방향이_결정된다() -> void:
     var character := Character.new()
     character.facing = Vector3.FORWARD
-    character.move_direction = Vector3.FORWARD
+    character.move_input = Vector3.FORWARD
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.FORWARD, EPSILON)
-    character.move_direction = Vector3.BACK
+    character.move_input = Vector3.BACK
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.BACK, EPSILON)
-    character.move_direction = Vector3.LEFT
+    character.move_input = Vector3.LEFT
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.LEFT, EPSILON)
-    character.move_direction = Vector3.RIGHT
+    character.move_input = Vector3.RIGHT
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.RIGHT, EPSILON)
     character.facing = Vector3.BACK
-    character.move_direction = Vector3.FORWARD
+    character.move_input = Vector3.FORWARD
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.BACK, EPSILON)
-    character.move_direction = Vector3.BACK
+    character.move_input = Vector3.BACK
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.FORWARD, EPSILON)
-    character.move_direction = Vector3.LEFT
+    character.move_input = Vector3.LEFT
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.RIGHT, EPSILON)
-    character.move_direction = Vector3.RIGHT
+    character.move_input = Vector3.RIGHT
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.LEFT, EPSILON)
     character.facing = Vector3.LEFT
-    character.move_direction = Vector3.FORWARD
+    character.move_input = Vector3.FORWARD
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.LEFT, EPSILON)
-    character.move_direction = Vector3.BACK
+    character.move_input = Vector3.BACK
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.RIGHT, EPSILON)
-    character.move_direction = Vector3.LEFT
+    character.move_input = Vector3.LEFT
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.BACK, EPSILON)
-    character.move_direction = Vector3.RIGHT
+    character.move_input = Vector3.RIGHT
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.FORWARD, EPSILON)
     character.facing = Vector3.RIGHT
-    character.move_direction = Vector3.FORWARD
+    character.move_input = Vector3.FORWARD
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.RIGHT, EPSILON)
-    character.move_direction = Vector3.BACK
+    character.move_input = Vector3.BACK
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.LEFT, EPSILON)
-    character.move_direction = Vector3.LEFT
+    character.move_input = Vector3.LEFT
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.FORWARD, EPSILON)
-    character.move_direction = Vector3.RIGHT
+    character.move_input = Vector3.RIGHT
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.BACK, EPSILON)
