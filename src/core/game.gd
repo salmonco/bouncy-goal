@@ -27,14 +27,13 @@ func tick(delta: float) -> void:
     if _is_back_goal():
         _back_goal.score += 1
     if is_goal():
-        ball.position = Ball.POSITION
+        ball.reset()
     for character in characters:
         character.move(delta)
     ball.move(delta)
 
 func start() -> void:
-    ball.position = Vector3.ZERO
-    ball.velocity = Vector3.ZERO
+    ball.reset()
     status = GameStatus.PLAYING
 
 func is_goal() -> bool:

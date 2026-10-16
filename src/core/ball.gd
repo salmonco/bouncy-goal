@@ -11,3 +11,7 @@ func _init(_position: Vector3 = POSITION) -> void:
 
 func move(delta: float) -> void:
     position += velocity * delta
+
+func reset() -> void:
+    position = POSITION
+    velocity = Vector3.ZERO

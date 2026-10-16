@@ -109,13 +109,15 @@ func test_아랫_골대에_공이_들어가면_점수가_오른다() -> void:
     game.tick(0.1)
     assert_int(back_goal.score).is_equal(2)
 
-func test_골을_넣으면_공의_위치가_리셋된다() -> void:
+func test_골을_넣으면_공의_위치와_속도가_초기화된다() -> void:
     var game := Game.new()
     game.start()
     var target := game.goals[0]
     game.ball.position = target.position
+    game.ball.velocity = Vector3.FORWARD
     game.tick(0.1)
     assert_vector(game.ball.position).is_equal(Ball.POSITION)
+    assert_vector(game.ball.velocity).is_equal(Vector3.ZERO)
 
 func test_게임이_시작되면_상태가_플레이_중으로_바뀐다() -> void:
     var game := Game.new()
