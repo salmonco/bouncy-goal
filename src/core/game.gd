@@ -3,9 +3,10 @@ extends RefCounted
 
 const DURATION: float = 60 * 10
 const FIELD_WIDTH: float = 800
+const FIELD_LENGTH: float = 2000
 
 var ball: Ball
-var goals: Array[Goal] = [Goal.new(Vector3(0, 0, -999)), Goal.new(Vector3(0, 0, 999))]
+var goals: Array[Goal] = [Goal.new(Vector3.FORWARD * FIELD_LENGTH / 2), Goal.new(Vector3.BACK * FIELD_LENGTH / 2)]
 var characters: Array[Character]
 var status: StringName = GameStatus.WAITING
 
