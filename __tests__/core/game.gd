@@ -506,3 +506,34 @@ func test_경기_중에는_승자가_없다() -> void:
     assert_int(game.winner()).is_equal(Character.NO_TEAM)
     game.tick(Game.DURATION / 2)
     assert_int(game.winner()).is_equal(Character.NO_TEAM)
+
+func test_캐릭터는_골대_입구로_골망_안에_들어갈_수_있다() -> void:
+    var player := Character.new()
+    var characters: Array[Character] = [player]
+    var game := Game.new(characters)
+    game.start()
+    player.place(Vector3(0, 0, -(Game.FIELD_LENGTH / 2 - 1)), Vector3.FORWARD)
+    player.move_input = Vector3.FORWARD
+    game.tick(0.1)
+    assert_float(player.position.z).is_less(-Game.FIELD_LENGTH / 2)
+
+func test_캐릭터는_골망_뒤로_나가지_않는다() -> void:
+    var player := Character.new()
+    var characters: Array[Character] = [player]
+    var game := Game.new(characters)
+    game.start()
+    player.place(Vector3(0, 0, -(Game.FIELD_LENGTH / 2 + Goal.DEPTH - 1)), Vector3.FORWARD)
+    player.move_input = Vector3.FORWARD
+    game.tick(0.1)
+    assert_float(player.position.z).is_equal(-(Game.FIELD_LENGTH / 2 + Goal.DEPTH))
+
+func test_캐릭터는_골망_옆으로_나가지_않는다() -> void:
+    var player := Character.new()
+    var characters: Array[Character] = [player]
+    var game := Game.new(characters)
+    game.start()
+    player.place(Vector3(Goal.WIDTH / 2 - 1, 0, -(Game.FIELD_LENGTH / 2 + 10)), Vector3.FORWARD)
+    player.move_input = Vector3.RIGHT
+    game.tick(0.1)
+    assert_float(player.position.x).is_equal(Goal.WIDTH / 2)
+    assert_float(player.position.z).is_less(-Game.FIELD_LENGTH / 2)
