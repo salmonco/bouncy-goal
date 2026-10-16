@@ -7,13 +7,14 @@ extends Node3D
 @onready var _score_label: Label = $HUD/Score
 
 const MOUSE_SENSITIVITY := 0.003
+const EYE_HEIGHT := 40.0
 
 var game: Game
+var _player: Character
 
 func _ready() -> void:
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
-    _camera.look_at(Vector3(0, 0, 250))
     _sun.rotation_degrees = Vector3(-55, 30, 0)
 
     var characters: Array[Character] = [
@@ -21,10 +22,14 @@ func _ready() -> void:
         Character.new(Vector3(0, 0, -300), Vector3.BACK),
     ]
     game = Game.new(characters)
+    _player = characters[0]
 
     for goal in game.goals:
         add_child(GoalView.new(goal))
-    add_child(CharacterView.new(characters[0], Color.ROYAL_BLUE))
+    # 1인칭이라 내 캐릭터는 카메라를 가리지 않게 숨깁니다.
+    var player_view := CharacterView.new(_player, Color.ROYAL_BLUE)
+    player_view.visible = false
+    add_child(player_view)
     add_child(CharacterView.new(characters[1], Color.CRIMSON))
     add_child(BallView.new(game.ball))
 
@@ -32,14 +37,16 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventMouseMotion:
-        game.characters[0].turn(-event.relative.x * MOUSE_SENSITIVITY)
+        _player.turn(-event.relative.x * MOUSE_SENSITIVITY)
     if event.is_action_pressed("ui_cancel"):
         Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 func _process(delta: float) -> void:
     var input_vector := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-    game.characters[0].move_input = Vector3(input_vector.x, 0, input_vector.y)
+    _player.move_input = Vector3(input_vector.x, 0, input_vector.y)
     game.tick(delta)
+    _camera.position = _player.position + Vector3.UP * EYE_HEIGHT
+    _camera.look_at(_camera.position + _player.facing)
     _score_label.text = "%d : %d   %s   %s" % [game.goals[0].score, game.goals[1].score, _format_time(game.remaining_time()), game.status]
 
 func _format_time(seconds: float) -> String:
