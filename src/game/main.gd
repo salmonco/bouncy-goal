@@ -27,6 +27,8 @@ func _ready() -> void:
     game.start()
 
 func _process(delta: float) -> void:
+    var input_vector := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+    game.characters[0].move_input = Vector3(input_vector.x, 0, input_vector.y)
     game.tick(delta)
     _score_label.text = "%d : %d   %s   %s" % [game.goals[0].score, game.goals[1].score, _format_time(game.remaining_time()), game.status]
 
