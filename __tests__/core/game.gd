@@ -370,3 +370,21 @@ func test_게임을_다시_시작하면_점수가_초기화된다() -> void:
     game.start()
     assert_int(forward_goal.score).is_equal(0)
     assert_int(back_goal.score).is_equal(0)
+
+func test_게임을_다시_시작하면_남은_시간이_초기화된다() -> void:
+    var game := Game.new()
+    game.start()
+    game.tick(Game.DURATION * 2)
+    game.start()
+    assert_float(game.remaining_time()).is_equal(Game.DURATION)
+
+func test_게임을_다시_시작하면_캐릭터가_처음_위치로_돌아간다() -> void:
+    var player := Character.new(Vector3(0, 0, 300), Vector3.FORWARD)
+    var characters: Array[Character] = [player]
+    var game := Game.new(characters)
+    game.start()
+    player.position = Vector3(100, 0, 100)
+    player.facing = Vector3.RIGHT
+    game.start()
+    assert_vector(player.position).is_equal(Vector3(0, 0, 300))
+    assert_vector(player.facing).is_equal(Vector3.FORWARD)

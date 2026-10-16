@@ -57,10 +57,10 @@ func tick(delta: float) -> void:
         ball.position.z = clamp(ball.position.z, -half_length, half_length)
 
 func start() -> void:
-    ball.reset()
-    status = GameStatus.PLAYING
+    _elapsed_time = 0.0
     for goal in goals:
         goal.reset()
+    _kickoff()
 
 func _kickoff() -> void:
     ball.reset()
