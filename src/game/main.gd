@@ -36,10 +36,12 @@ func _ready() -> void:
     game.start()
 
 func _unhandled_input(event: InputEvent) -> void:
-    if event is InputEventMouseMotion:
-        _player.turn(-event.relative.x * MOUSE_SENSITIVITY)
     if event.is_action_pressed("ui_cancel"):
         Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+    if event is InputEventMouseMotion:
+        _player.turn(-event.relative.x * MOUSE_SENSITIVITY)
+    if event.is_action_pressed("bounce"):
+        _player.bounce(game.ball)
 
 func _process(delta: float) -> void:
     var input_vector := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
