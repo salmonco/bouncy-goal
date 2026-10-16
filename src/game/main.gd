@@ -31,6 +31,7 @@ func _ready() -> void:
     var characters: Array[Character] = [_player, _npc]
     game = Game.new(characters)
 
+    add_child(FieldWallsView.new())
     for goal in game.goals:
         add_child(GoalView.new(goal))
     # 1인칭이라 내 캐릭터는 카메라를 가리지 않게 숨깁니다.
