@@ -2,6 +2,7 @@ class_name Game
 extends RefCounted
 
 const DURATION: float = 60 * 10
+const FIELD_WIDTH: float = 800
 
 var ball: Ball
 var goals: Array[Goal] = [Goal.new(Vector3(0, 0, -999)), Goal.new(Vector3(0, 0, 999))]
@@ -31,6 +32,9 @@ func tick(delta: float) -> void:
     for character in characters:
         character.move(delta)
     ball.move(delta)
+    if ball.position.x > FIELD_WIDTH / 2 or ball.position.x < -FIELD_WIDTH / 2:
+        ball.velocity.x = -ball.velocity.x
+        ball.position.x = clamp(ball.position.x, -FIELD_WIDTH / 2, FIELD_WIDTH / 2)
 
 func start() -> void:
     ball.reset()

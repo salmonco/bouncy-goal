@@ -196,3 +196,29 @@ func test_시간이_흐르면_공이_움직인다() -> void:
     var initial_position := game.ball.position
     game.tick(0.1)
     assert_vector(game.ball.position).is_equal_approx(initial_position + game.ball.velocity * 0.1, EPSILON)
+
+func test_공이_옆_벽에_닿으면_x_속도가_반대로_바뀐다() -> void:
+    var game := Game.new()
+    game.start()
+    game.ball.position = Vector3.RIGHT * (Game.FIELD_WIDTH / 2 - 1)
+    game.ball.velocity = Vector3(100, 0, -100)
+    game.tick(0.1)
+    assert_float(game.ball.velocity.x).is_less(0)
+    assert_float(game.ball.velocity.z).is_less(0)
+
+func test_공이_반대쪽_옆_벽에_닿아도_x_속도가_반대로_바뀐다() -> void:
+    var game := Game.new()
+    game.start()
+    game.ball.position = Vector3.LEFT * (Game.FIELD_WIDTH / 2 - 1)
+    game.ball.velocity = Vector3(-100, 0, -100)
+    game.tick(0.1)
+    assert_float(game.ball.velocity.x).is_greater(0)
+    assert_float(game.ball.velocity.z).is_less(0)
+
+func test_공은_옆_벽_밖으로_나가지_않는다() -> void:
+    var game := Game.new()
+    game.start()
+    game.ball.position = Vector3.RIGHT * (Game.FIELD_WIDTH / 2 - 1)
+    game.ball.velocity = Vector3.RIGHT * 100
+    game.tick(0.1)
+    assert_float(game.ball.position.x).is_less_equal(Game.FIELD_WIDTH / 2)
