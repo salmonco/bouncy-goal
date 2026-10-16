@@ -4,11 +4,13 @@ extends RefCounted
 const BOUNCE_RANGE := 50.0
 const POWER := 250.0
 const SPEED := 250.0
+const NO_TEAM := -1
 
 var position: Vector3
 var facing: Vector3
 var move_input: Vector3 = Vector3.ZERO
 var speed: float = SPEED
+var team: int = NO_TEAM
 
 var _start_position: Vector3
 var _start_facing: Vector3
@@ -34,6 +36,11 @@ func world_move_direction() -> Vector3:
 
 func move(delta: float) -> void:
     position += world_move_direction() * speed * delta
+
+func place(_position: Vector3, _facing: Vector3) -> void:
+    _start_position = _position
+    _start_facing = _facing
+    reset()
 
 func reset() -> void:
     position = _start_position

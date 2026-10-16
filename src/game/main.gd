@@ -24,8 +24,9 @@ func _ready() -> void:
     (_field.mesh as PlaneMesh).size = Vector2(Game.FIELD_WIDTH, Game.FIELD_LENGTH)
     (_center_line.mesh as BoxMesh).size.x = Game.FIELD_WIDTH
 
-    _player = Character.new(Vector3(0, 0, 300), Vector3.FORWARD)
-    _npc = Npc.new(Vector3(0, 0, -300), Vector3.BACK)
+    # 시작 위치는 game.start() 에서 팀이 정해질 때 배치됩니다.
+    _player = Character.new()
+    _npc = Npc.new()
     var characters: Array[Character] = [_player, _npc]
     game = Game.new(characters)
 
@@ -51,7 +52,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
     var input_vector := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
     _player.move_input = Vector3(input_vector.x, 0, input_vector.y)
-    _npc.think(game.ball, game.goals[1])
+    _npc.think(game.ball, game.opponent_goal_of(_npc))
     game.tick(delta)
     _camera.position = _player.position + Vector3.UP * EYE_HEIGHT
     _camera.look_at(_camera.position + _player.facing)

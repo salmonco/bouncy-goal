@@ -176,6 +176,8 @@ func test_골을_넣으면_잠시_뒤에_공과_캐릭터가_처음_위치로_�
     var characters: Array[Character] = [player]
     var game := Game.new(characters)
     game.start()
+    var start_position := player.position
+    var start_facing := player.facing
     player.position = Vector3(100, 0, 100)
     player.facing = Vector3.RIGHT
     game.ball.position = game.goals[0].position
@@ -184,8 +186,8 @@ func test_골을_넣으면_잠시_뒤에_공과_캐릭터가_처음_위치로_�
     game.tick(Game.GOAL_PAUSE)
     assert_vector(game.ball.position).is_equal(Ball.POSITION)
     assert_vector(game.ball.velocity).is_equal(Vector3.ZERO)
-    assert_vector(player.position).is_equal(Vector3(0, 0, 300))
-    assert_vector(player.facing).is_equal(Vector3.FORWARD)
+    assert_vector(player.position).is_equal(start_position)
+    assert_vector(player.facing).is_equal(start_facing)
 
 func test_골_상태가_끝나면_다시_플레이_중이_된다() -> void:
     var game := Game.new()
@@ -258,8 +260,8 @@ func test_시간이_흐르면_캐릭터가_이동_방향으로_움직인다() ->
     var characters: Array[Character] = [Character.new(), Character.new()]
     var game := Game.new(characters)
     var player := characters[0]
-    var initial_position := player.position
     game.start()
+    var initial_position := player.position
     player.move_input = Vector3.FORWARD
     game.tick(0.1)
     assert_vector(player.position).is_equal_approx(initial_position + player.world_move_direction() * Character.SPEED * 0.1, EPSILON)
@@ -337,11 +339,13 @@ func test_공이_골대_입구로_가면_벽에_튕기지_않고_골이_된다()
     assert_int(forward_goal.score).is_equal(1)
 
 func test_캐릭터는_옆_벽_밖으로_나가지_않는다() -> void:
-    var right_player := Character.new(Vector3.RIGHT * (Game.FIELD_WIDTH / 2 - 1), Vector3.FORWARD)
-    var left_player := Character.new(Vector3.LEFT * (Game.FIELD_WIDTH / 2 - 1), Vector3.FORWARD)
+    var right_player := Character.new()
+    var left_player := Character.new()
     var characters: Array[Character] = [right_player, left_player]
     var game := Game.new(characters)
     game.start()
+    right_player.place(Vector3.RIGHT * (Game.FIELD_WIDTH / 2 - 1), Vector3.FORWARD)
+    left_player.place(Vector3.LEFT * (Game.FIELD_WIDTH / 2 - 1), Vector3.FORWARD)
     right_player.move_input = Vector3.RIGHT
     left_player.move_input = Vector3.LEFT
     game.tick(0.1)
@@ -349,11 +353,13 @@ func test_캐릭터는_옆_벽_밖으로_나가지_않는다() -> void:
     assert_float(left_player.position.x).is_equal(-Game.FIELD_WIDTH / 2)
 
 func test_캐릭터는_앞뒤_벽_밖으로_나가지_않는다() -> void:
-    var forward_player := Character.new(Vector3(200, 0, -(Game.FIELD_LENGTH / 2 - 1)), Vector3.FORWARD)
-    var back_player := Character.new(Vector3(200, 0, Game.FIELD_LENGTH / 2 - 1), Vector3.BACK)
+    var forward_player := Character.new()
+    var back_player := Character.new()
     var characters: Array[Character] = [forward_player, back_player]
     var game := Game.new(characters)
     game.start()
+    forward_player.place(Vector3(200, 0, -(Game.FIELD_LENGTH / 2 - 1)), Vector3.FORWARD)
+    back_player.place(Vector3(200, 0, Game.FIELD_LENGTH / 2 - 1), Vector3.BACK)
     forward_player.move_input = Vector3.FORWARD
     back_player.move_input = Vector3.FORWARD
     game.tick(0.1)
@@ -383,8 +389,80 @@ func test_게임을_다시_시작하면_캐릭터가_처음_위치로_돌아간�
     var characters: Array[Character] = [player]
     var game := Game.new(characters)
     game.start()
+    var start_position := player.position
+    var start_facing := player.facing
     player.position = Vector3(100, 0, 100)
     player.facing = Vector3.RIGHT
     game.start()
-    assert_vector(player.position).is_equal(Vector3(0, 0, 300))
-    assert_vector(player.facing).is_equal(Vector3.FORWARD)
+    assert_vector(player.position).is_equal(start_position)
+    assert_vector(player.facing).is_equal(start_facing)
+
+func test_게임이_시작되면_모든_캐릭터가_팀을_가진다() -> void:
+    var game := Game.new(_characters(4))
+    game.start()
+    for character in game.characters:
+        assert_int(character.team).is_not_equal(Character.NO_TEAM)
+
+func test_팀은_인원이_같게_나뉜다() -> void:
+    var game := Game.new(_characters(4))
+    game.start()
+    var team_0 := game.characters.filter(func(c): return c.team == 0)
+    var team_1 := game.characters.filter(func(c): return c.team == 1)
+    assert_int(team_0.size()).is_equal(2)
+    assert_int(team_1.size()).is_equal(2)
+
+func test_같은_시드면_같은_팀이_구성된다() -> void:
+    assert_array(_teams_with_seed(7)).is_equal(_teams_with_seed(7))
+
+func test_시드가_다르면_다른_팀이_구성될_수_있다() -> void:
+    var first := _teams_with_seed(0)
+    var has_different := false
+    for _seed in range(1, 20):
+        if _teams_with_seed(_seed) != first:
+            has_different = true
+    assert_bool(has_different).is_true()
+
+func test_골대는_각_팀에_하나씩_할당된다() -> void:
+    var game := Game.new()
+    assert_int(game.goals[0].team).is_equal(0)
+    assert_int(game.goals[1].team).is_equal(1)
+
+func test_캐릭터는_자기_팀_골대_쪽_진영에서_시작한다() -> void:
+    var game := Game.new(_characters(4))
+    game.start()
+    for character in game.characters:
+        var own_goal := game.goal_of(character.team)
+        assert_float(signf(character.position.z)).is_equal(signf(own_goal.position.z))
+
+func test_캐릭터는_상대_골대를_바라보고_시작한다() -> void:
+    var game := Game.new(_characters(4))
+    game.start()
+    for character in game.characters:
+        var to_opponent_goal := game.opponent_goal_of(character).position - character.position
+        assert_float(character.facing.dot(to_opponent_goal)).is_greater(0)
+
+func test_같은_팀_캐릭터는_서로_다른_위치에서_시작한다() -> void:
+    var game := Game.new(_characters(4))
+    game.start()
+    var positions := game.characters.map(func(c): return c.position)
+    for i in positions.size():
+        for j in range(i + 1, positions.size()):
+            assert_vector(positions[i]).is_not_equal(positions[j])
+
+func test_캐릭터가_공격할_골대는_상대_팀_골대다() -> void:
+    var game := Game.new(_characters(2))
+    game.start()
+    for character in game.characters:
+        assert_int(game.opponent_goal_of(character).team).is_not_equal(character.team)
+
+func _characters(count: int) -> Array[Character]:
+    var characters: Array[Character] = []
+    for i in count:
+        characters.append(Character.new())
+    return characters
+
+func _teams_with_seed(_seed: int) -> Array:
+    var game := Game.new(_characters(6))
+    game.rng.seed = _seed
+    game.start()
+    return game.characters.map(func(c): return c.team)

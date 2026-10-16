@@ -5,9 +5,12 @@ const DURATION: float = 60 * 10
 const FIELD_WIDTH: float = 800
 const FIELD_LENGTH: float = 2000
 const GOAL_PAUSE: float = 2.0
+const START_DISTANCE: float = 300
+const START_SPACING: float = 100
 
 var ball: Ball
-var goals: Array[Goal] = [Goal.new(Vector3.FORWARD * FIELD_LENGTH / 2), Goal.new(Vector3.BACK * FIELD_LENGTH / 2)]
+var rng := RandomNumberGenerator.new()
+var goals: Array[Goal] = [Goal.new(Vector3.FORWARD * FIELD_LENGTH / 2, 0), Goal.new(Vector3.BACK * FIELD_LENGTH / 2, 1)]
 var characters: Array[Character]
 var status: StringName = GameStatus.WAITING
 
@@ -19,6 +22,7 @@ var _back_goal := goals[1]
 func _init(_characters: Array[Character] = []) -> void:
     ball = Ball.new()
     characters = _characters
+    rng.randomize()
 
 func tick(delta: float) -> void:
     if status == GameStatus.WAITING or status == GameStatus.OVER:
@@ -60,13 +64,44 @@ func start() -> void:
     _elapsed_time = 0.0
     for goal in goals:
         goal.reset()
+    _form_teams()
     _kickoff()
+
+func _form_teams() -> void:
+    var shuffled := characters.duplicate()
+    for i in range(shuffled.size() - 1, 0, -1):
+        var j := rng.randi_range(0, i)
+        var temp = shuffled[i]
+        shuffled[i] = shuffled[j]
+        shuffled[j] = temp
+    for i in shuffled.size():
+        shuffled[i].team = i % goals.size()
+    for goal in goals:
+        _line_up(shuffled.filter(func(c): return c.team == goal.team), goal)
+
+func _line_up(members: Array, own_goal: Goal) -> void:
+    var side := own_goal.position.normalized()
+    for i in members.size():
+        var offset := (i - (members.size() - 1) / 2.0) * START_SPACING
+        members[i].place(side * START_DISTANCE + Vector3.RIGHT * offset, -side)
 
 func _kickoff() -> void:
     ball.reset()
     for character in characters:
         character.reset()
     status = GameStatus.PLAYING
+
+func goal_of(team: int) -> Goal:
+    for goal in goals:
+        if goal.team == team:
+            return goal
+    return null
+
+func opponent_goal_of(character: Character) -> Goal:
+    for goal in goals:
+        if goal.team != character.team:
+            return goal
+    return null
 
 func is_goal() -> bool:
     return _is_forward_goal() or _is_back_goal()

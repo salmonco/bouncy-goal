@@ -124,3 +124,17 @@ func test_캐릭터는_리셋하면_처음_위치와_방향으로_돌아간다()
     assert_vector(character.position).is_equal(Vector3(0, 0, 300))
     assert_vector(character.facing).is_equal(Vector3.FORWARD)
     assert_vector(character.move_input).is_equal(Vector3.ZERO)
+
+func test_캐릭터는_처음에는_팀이_없다() -> void:
+    var character := Character.new()
+    assert_int(character.team).is_equal(Character.NO_TEAM)
+
+func test_캐릭터를_배치하면_그_위치가_시작_위치가_된다() -> void:
+    var character := Character.new(Vector3(0, 0, 300), Vector3.FORWARD)
+    character.place(Vector3(0, 0, -300), Vector3.BACK)
+    assert_vector(character.position).is_equal(Vector3(0, 0, -300))
+    assert_vector(character.facing).is_equal(Vector3.BACK)
+    character.position = Vector3(100, 0, 100)
+    character.reset()
+    assert_vector(character.position).is_equal(Vector3(0, 0, -300))
+    assert_vector(character.facing).is_equal(Vector3.BACK)

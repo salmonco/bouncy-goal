@@ -6,9 +6,11 @@ const DEPTH := 40.0
 
 var position: Vector3
 var score: int = 0
+var team: int
 
-func _init(_position: Vector3) -> void:
+func _init(_position: Vector3, _team: int = Character.NO_TEAM) -> void:
     position = _position
+    team = _team
 
 func reset() -> void:
     score = 0
