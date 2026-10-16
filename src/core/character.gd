@@ -30,3 +30,6 @@ func world_move_direction() -> Vector3:
     if move_input == Vector3.RIGHT:
         return facing.rotated(Vector3.UP, deg_to_rad(-90))
     return Vector3.ZERO
+
+func turn(angle: float) -> void:
+    facing = facing.rotated(Vector3.UP, angle).normalized()

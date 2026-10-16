@@ -74,3 +74,17 @@ func test_캐릭터는_이동_방향이_없으면_월드의_이동_방향_또한
     var character := Character.new()
     character.move_input = Vector3.ZERO
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.ZERO, EPSILON)
+
+func test_캐릭터는_회전해서_얼굴_방향을_바꿀_수_있다() -> void:
+    var character := Character.new()
+    character.facing = Vector3.FORWARD
+    character.turn(deg_to_rad(90))
+    assert_vector(character.facing).is_equal_approx(Vector3.LEFT, EPSILON)
+    character.turn(deg_to_rad(90))
+    assert_vector(character.facing).is_equal_approx(Vector3.BACK, EPSILON)
+    character.turn(deg_to_rad(90))
+    assert_vector(character.facing).is_equal_approx(Vector3.RIGHT, EPSILON)
+    character.turn(deg_to_rad(90))
+    assert_vector(character.facing).is_equal_approx(Vector3.FORWARD, EPSILON)
+    character.turn(deg_to_rad(180))
+    assert_vector(character.facing).is_equal_approx(Vector3.BACK, EPSILON)
