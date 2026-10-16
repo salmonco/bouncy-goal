@@ -107,3 +107,10 @@ func test_캐릭터는_회전해서_얼굴_방향을_바꿀_수_있다() -> void
     assert_vector(character.facing).is_equal_approx(Vector3.FORWARD, EPSILON)
     character.turn(deg_to_rad(180))
     assert_vector(character.facing).is_equal_approx(Vector3.BACK, EPSILON)
+
+func test_캐릭터가_공을_튀기면_공의_속도가_바뀐다() -> void:
+    var character := Character.new()
+    var ball := Ball.new()
+    ball.position = Vector3.FORWARD * 10
+    character.bounce(ball)
+    assert_vector(ball.velocity).is_equal(character.facing * Character.POWER)

@@ -17,7 +17,7 @@ func bounce(ball: Ball) -> bool:
     var to_ball := ball.position - position
     if to_ball.length() > BOUNCE_RANGE or facing.dot(to_ball) <= 0:
         return false
-    ball.position += facing * POWER
+    ball.velocity = facing * POWER
     return true
 
 func world_move_direction() -> Vector3:
