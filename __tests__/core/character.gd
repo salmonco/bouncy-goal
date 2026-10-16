@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 
-const EPSILON := Vector3(0.0001, 0.0001, 0.0001)
+const EPSILON := Vector3.ONE * 0.0001
 
 func test_캐릭터는_자신의_위치를_가진다() -> void:
     var character := Character.new(Vector3(-10, 0, -10))

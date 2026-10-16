@@ -1,6 +1,6 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3 uid="uid://hoss3y3bul2o"]
 
-[ext_resource type="Script" path="res://src/game/main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://ifr2y5ggcohf" path="res://src/game/main.gd" id="1_main"]
 
 [sub_resource type="Environment" id="Environment_sky"]
 background_mode = 1
@@ -19,31 +19,31 @@ size = Vector2(600, 2000)
 [sub_resource type="BoxMesh" id="Mesh_center_line"]
 size = Vector3(600, 0.5, 4)
 
-[node name="Main" type="Node3D"]
+[node name="Main" type="Node3D" unique_id=1305998170]
 script = ExtResource("1_main")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1432107783]
 environment = SubResource("Environment_sky")
 
-[node name="Sun" type="DirectionalLight3D" parent="."]
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=817299910]
 shadow_enabled = true
 directional_shadow_max_distance = 4000.0
 
-[node name="Camera3D" type="Camera3D" parent="."]
-position = Vector3(0, 1600, 1800)
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1189206627]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1600, 1800)
 fov = 45.0
 far = 6000.0
 
-[node name="Field" type="MeshInstance3D" parent="."]
+[node name="Field" type="MeshInstance3D" parent="." unique_id=526631424]
 mesh = SubResource("Mesh_field")
 
-[node name="CenterLine" type="MeshInstance3D" parent="Field"]
-position = Vector3(0, 0.25, 0)
+[node name="CenterLine" type="MeshInstance3D" parent="Field" unique_id=335333627]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
 mesh = SubResource("Mesh_center_line")
 
-[node name="HUD" type="CanvasLayer" parent="."]
+[node name="HUD" type="CanvasLayer" parent="." unique_id=121039988]
 
-[node name="Score" type="Label" parent="HUD"]
+[node name="Score" type="Label" parent="HUD" unique_id=181930563]
 anchors_preset = 10
 anchor_right = 1.0
 offset_top = 16.0

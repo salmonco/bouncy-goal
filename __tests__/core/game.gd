@@ -1,5 +1,7 @@
 extends GdUnitTestSuite
 
+const EPSILON := Vector3.ONE * 0.0001
+
 func test_게임이_초기화되면_공이_생긴다() -> void:
    var game := Game.new()
    assert_that(game.ball).is_not_null()
@@ -173,3 +175,13 @@ func test_캐릭터가_공을_튀기지_못하면_공의_위치는_그대로다(
     game.ball.position = initial_position
     player.bounce(game.ball)
     assert_vector(game.ball.position).is_equal(initial_position)
+
+func test_시간이_흐르면_캐릭터가_이동_방향으로_움직인다() -> void:
+    var characters: Array[Character] = [Character.new(), Character.new()]
+    var game := Game.new(characters)
+    var player := characters[0]
+    var initial_position := player.position
+    game.start()
+    player.move_input = Vector3.FORWARD
+    game.tick(0.1)
+    assert_vector(player.position).is_equal_approx(initial_position + player.world_move_direction() * Character.SPEED * 0.1, EPSILON)

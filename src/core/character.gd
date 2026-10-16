@@ -3,7 +3,7 @@ extends RefCounted
 
 const BOUNCE_RANGE := 50.0
 const POWER := 10.0
-const SPEED := 5.0
+const SPEED := 200.0
 
 var position: Vector3
 var facing: Vector3
