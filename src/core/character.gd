@@ -2,12 +2,13 @@ class_name Character
 extends RefCounted
 
 const BOUNCE_RANGE := 50.0
-const POWER := 200.0
+const POWER := 250.0
 const SPEED := 250.0
 
 var position: Vector3
 var facing: Vector3
 var move_input: Vector3 = Vector3.ZERO
+var speed: float = SPEED
 
 func _init(_position = Vector3.ZERO, _facing = Vector3.FORWARD) -> void:
     position = _position
@@ -27,7 +28,7 @@ func world_move_direction() -> Vector3:
     return facing.rotated(Vector3.UP, angle)
 
 func move(delta: float) -> void:
-    position += world_move_direction() * Character.SPEED * delta
+    position += world_move_direction() * speed * delta
 
 func turn(angle: float) -> void:
     facing = facing.rotated(Vector3.UP, angle).normalized()

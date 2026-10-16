@@ -13,6 +13,7 @@ const EYE_HEIGHT := 40.0
 
 var game: Game
 var _player: Character
+var _npc: Npc
 
 func _ready() -> void:
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -23,12 +24,10 @@ func _ready() -> void:
     (_field.mesh as PlaneMesh).size = Vector2(Game.FIELD_WIDTH, Game.FIELD_LENGTH)
     (_center_line.mesh as BoxMesh).size.x = Game.FIELD_WIDTH
 
-    var characters: Array[Character] = [
-        Character.new(Vector3(0, 0, 300), Vector3.FORWARD),
-        Character.new(Vector3(0, 0, -300), Vector3.BACK),
-    ]
+    _player = Character.new(Vector3(0, 0, 300), Vector3.FORWARD)
+    _npc = Npc.new(Vector3(0, 0, -300), Vector3.BACK)
+    var characters: Array[Character] = [_player, _npc]
     game = Game.new(characters)
-    _player = characters[0]
 
     for goal in game.goals:
         add_child(GoalView.new(goal))
@@ -36,7 +35,7 @@ func _ready() -> void:
     var player_view := CharacterView.new(_player, Color.ROYAL_BLUE)
     player_view.visible = false
     add_child(player_view)
-    add_child(CharacterView.new(characters[1], Color.CRIMSON))
+    add_child(CharacterView.new(_npc, Color.CRIMSON))
     add_child(BallView.new(game.ball))
 
     game.start()
@@ -52,6 +51,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
     var input_vector := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
     _player.move_input = Vector3(input_vector.x, 0, input_vector.y)
+    _npc.think(game.ball, game.goals[1])
     game.tick(delta)
     _camera.position = _player.position + Vector3.UP * EYE_HEIGHT
     _camera.look_at(_camera.position + _player.facing)
