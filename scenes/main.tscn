@@ -14,10 +14,10 @@ albedo_color = Color(0.27, 0.58, 0.3, 1)
 
 [sub_resource type="PlaneMesh" id="Mesh_field"]
 material = SubResource("Material_grass")
-size = Vector2(600, 2000)
+size = Vector2(800, 2000)
 
 [sub_resource type="BoxMesh" id="Mesh_center_line"]
-size = Vector3(600, 0.5, 4)
+size = Vector3(800, 0.5, 4)
 
 [node name="Main" type="Node3D" unique_id=1305998170]
 script = ExtResource("1_main")

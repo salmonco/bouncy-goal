@@ -5,6 +5,8 @@ extends Node3D
 @onready var _camera: Camera3D = $Camera3D
 @onready var _sun: DirectionalLight3D = $Sun
 @onready var _score_label: Label = $HUD/Score
+@onready var _field: MeshInstance3D = $Field
+@onready var _center_line: MeshInstance3D = $Field/CenterLine
 
 const MOUSE_SENSITIVITY := 0.003
 const EYE_HEIGHT := 40.0
@@ -16,6 +18,10 @@ func _ready() -> void:
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
     _sun.rotation_degrees = Vector3(-55, 30, 0)
+
+    # 경기장 크기는 코어(Game)의 상수를 따릅니다. 씬의 값은 에디터 미리보기용입니다.
+    (_field.mesh as PlaneMesh).size = Vector2(Game.FIELD_WIDTH, Game.FIELD_LENGTH)
+    (_center_line.mesh as BoxMesh).size.x = Game.FIELD_WIDTH
 
     var characters: Array[Character] = [
         Character.new(Vector3(0, 0, 300), Vector3.FORWARD),
