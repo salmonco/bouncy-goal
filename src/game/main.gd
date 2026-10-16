@@ -52,7 +52,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
     var input_vector := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
     _player.move_input = Vector3(input_vector.x, 0, input_vector.y)
-    _npc.think(game.ball, game.opponent_goal_of(_npc))
+    _npc.think(game.ball, game.opponent_goal_of(_npc.team))
     game.tick(delta)
     _camera.position = _player.position + Vector3.UP * EYE_HEIGHT
     _camera.look_at(_camera.position + _player.facing)

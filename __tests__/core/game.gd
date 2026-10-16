@@ -438,7 +438,7 @@ func test_캐릭터는_상대_골대를_바라보고_시작한다() -> void:
     var game := Game.new(_characters(4))
     game.start()
     for character in game.characters:
-        var to_opponent_goal := game.opponent_goal_of(character).position - character.position
+        var to_opponent_goal := game.opponent_goal_of(character.team).position - character.position
         assert_float(character.facing.dot(to_opponent_goal)).is_greater(0)
 
 func test_같은_팀_캐릭터는_서로_다른_위치에서_시작한다() -> void:
@@ -453,7 +453,7 @@ func test_캐릭터가_공격할_골대는_상대_팀_골대다() -> void:
     var game := Game.new(_characters(2))
     game.start()
     for character in game.characters:
-        assert_int(game.opponent_goal_of(character).team).is_not_equal(character.team)
+        assert_int(game.opponent_goal_of(character.team).team).is_not_equal(character.team)
 
 func _characters(count: int) -> Array[Character]:
     var characters: Array[Character] = []

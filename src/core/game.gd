@@ -97,9 +97,9 @@ func goal_of(team: int) -> Goal:
             return goal
     return null
 
-func opponent_goal_of(character: Character) -> Goal:
+func opponent_goal_of(team: int) -> Goal:
     for goal in goals:
-        if goal.team != character.team:
+        if goal.team != team:
             return goal
     return null
 
