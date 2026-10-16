@@ -6,9 +6,13 @@ extends Node3D
 @onready var _sun: DirectionalLight3D = $Sun
 @onready var _score_label: Label = $HUD/Score
 
+const MOUSE_SENSITIVITY := 0.003
+
 var game: Game
 
 func _ready() -> void:
+    Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
     _camera.look_at(Vector3(0, 0, 250))
     _sun.rotation_degrees = Vector3(-55, 30, 0)
 
@@ -25,6 +29,12 @@ func _ready() -> void:
     add_child(BallView.new(game.ball))
 
     game.start()
+
+func _unhandled_input(event: InputEvent) -> void:
+    if event is InputEventMouseMotion:
+        game.characters[0].turn(-event.relative.x * MOUSE_SENSITIVITY)
+    if event.is_action_pressed("ui_cancel"):
+        Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 func _process(delta: float) -> void:
     var input_vector := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
