@@ -3,9 +3,11 @@ extends RefCounted
 
 const BOUNCE_RANGE := 50.0
 const POWER := 10.0
+const SPEED := 5.0
 
 var position: Vector3
-var facing : Vector3
+var facing: Vector3
+var move_direction: Vector3 = Vector3.ZERO # input
 
 func _init(_position = Vector3.ZERO, _facing = Vector3.FORWARD) -> void:
     position = _position
@@ -17,3 +19,12 @@ func bounce(ball: Ball) -> bool:
         return false
     ball.position += facing * POWER
     return true
+
+func world_move_direction() -> Vector3:
+    if move_direction == Vector3.BACK:
+        return facing.rotated(Vector3.UP, deg_to_rad(180))
+    if move_direction == Vector3.LEFT:
+        return facing.rotated(Vector3.UP, deg_to_rad(90))
+    if move_direction == Vector3.RIGHT:
+        return facing.rotated(Vector3.UP, deg_to_rad(-90))
+    return facing
