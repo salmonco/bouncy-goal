@@ -19,11 +19,13 @@ func test_게임이_초기화되면_상태가_대기_상태다() -> void:
     var game := Game.new()
     assert_str(game.status).is_equal(GameStatus.WAITING)
 
-func test_게임이_시작하면_공_위치가_초기화된다() -> void:
+func test_게임이_시작하면_공_위치와_속도가_초기화된다() -> void:
     var game := Game.new()
     game.ball.position = Vector3.FORWARD
+    game.ball.velocity = Vector3.FORWARD
     game.start()
     assert_vector(game.ball.position).is_equal(Vector3.ZERO)
+    assert_vector(game.ball.velocity).is_equal(Vector3.ZERO)
 
 func test_공이_윗_골대_영역에_있으면_골이다() -> void:
     var game := Game.new()

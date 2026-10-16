@@ -34,6 +34,7 @@ func tick(delta: float) -> void:
 
 func start() -> void:
     ball.position = Vector3.ZERO
+    ball.velocity = Vector3.ZERO
     status = GameStatus.PLAYING
 
 func is_goal() -> bool:
