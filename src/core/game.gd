@@ -36,6 +36,10 @@ func tick(delta: float) -> void:
     if ball.position.x > FIELD_WIDTH / 2 or ball.position.x < -FIELD_WIDTH / 2:
         ball.velocity.x = -ball.velocity.x
         ball.position.x = clamp(ball.position.x, -FIELD_WIDTH / 2, FIELD_WIDTH / 2)
+    var is_in_goal_mouth := absf(ball.position.x) < Goal.WIDTH / 2
+    if not is_in_goal_mouth and (ball.position.z > FIELD_LENGTH / 2 or ball.position.z < -FIELD_LENGTH / 2):
+        ball.velocity.z = -ball.velocity.z
+        ball.position.z = clamp(ball.position.z, -FIELD_LENGTH / 2, FIELD_LENGTH / 2)
 
 func start() -> void:
     ball.reset()

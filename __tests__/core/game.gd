@@ -222,3 +222,40 @@ func test_공은_옆_벽_밖으로_나가지_않는다() -> void:
     game.ball.velocity = Vector3.RIGHT * 100
     game.tick(0.1)
     assert_float(game.ball.position.x).is_less_equal(Game.FIELD_WIDTH / 2)
+
+func test_공이_앞_벽에_닿으면_z_속도가_반대로_바뀐다() -> void:
+    var game := Game.new()
+    game.start()
+    game.ball.position = Vector3(200, 0, -(Game.FIELD_LENGTH / 2 - 1))
+    game.ball.velocity = Vector3(100, 0, -100)
+    game.tick(0.1)
+    assert_float(game.ball.velocity.z).is_greater(0)
+    assert_float(game.ball.velocity.x).is_greater(0)
+
+func test_공이_뒤_벽에_닿아도_z_속도가_반대로_바뀐다() -> void:
+    var game := Game.new()
+    game.start()
+    game.ball.position = Vector3(200, 0, Game.FIELD_LENGTH / 2 - 1)
+    game.ball.velocity = Vector3(100, 0, 100)
+    game.tick(0.1)
+    assert_float(game.ball.velocity.z).is_less(0)
+    assert_float(game.ball.velocity.x).is_greater(0)
+
+func test_공은_앞뒤_벽_밖으로_나가지_않는다() -> void:
+    var game := Game.new()
+    game.start()
+    game.ball.position = Vector3(200, 0, -(Game.FIELD_LENGTH / 2 - 1))
+    game.ball.velocity = Vector3.FORWARD * 100
+    game.tick(0.1)
+    assert_float(game.ball.position.z).is_greater_equal(-Game.FIELD_LENGTH / 2)
+
+func test_공이_골대_입구로_가면_벽에_튕기지_않고_골이_된다() -> void:
+    var game := Game.new()
+    game.start()
+    var forward_goal := game.goals[0]
+    game.ball.position = Vector3(0, 0, -(Game.FIELD_LENGTH / 2 - 1))
+    game.ball.velocity = Vector3.FORWARD * 100
+    game.tick(0.1)
+    assert_float(game.ball.velocity.z).is_less(0)
+    game.tick(0.1)
+    assert_int(forward_goal.score).is_equal(1)
