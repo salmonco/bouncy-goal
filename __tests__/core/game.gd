@@ -153,3 +153,23 @@ func test_게임을_시작하면_남은_시간이_계산된다() -> void:
     assert_float(game.remaining_time()).is_equal(Game.DURATION - 0.1)
     game.tick(0.1)
     assert_float(game.remaining_time()).is_equal(Game.DURATION - 0.1 * 2)
+
+func test_캐릭터가_공을_튀기면_공이_캐릭터의_방향으로_이동한다() -> void:
+    var characters: Array[Character] = [Character.new(), Character.new()]
+    var game := Game.new(characters)
+    var player := characters[0]
+    player.facing = Vector3.FORWARD
+    var initial_position := Vector3.FORWARD * 10
+    game.ball.position = initial_position
+    player.bounce(game.ball)
+    assert_vector(game.ball.position).is_equal(initial_position + player.facing * Character.POWER)
+
+func test_캐릭터가_공을_튀기지_못하면_공의_위치는_그대로다() -> void:
+    var characters: Array[Character] = [Character.new(), Character.new()]
+    var game := Game.new(characters)
+    var player := characters[0]
+    player.facing = Vector3.BACK
+    var initial_position := Vector3.FORWARD * 10
+    game.ball.position = initial_position
+    player.bounce(game.ball)
+    assert_vector(game.ball.position).is_equal(initial_position)
