@@ -1,7 +1,7 @@
 class_name Game
 extends RefCounted
 
-const DURATION: float = 60 * 10
+const DURATION: float = 60 * 5
 const FIELD_WIDTH: float = 800
 const FIELD_LENGTH: float = 2000
 const GOAL_PAUSE: float = 2.0

@@ -5,6 +5,7 @@ extends Node3D
 @onready var _camera: Camera3D = $Camera3D
 @onready var _sun: DirectionalLight3D = $Sun
 @onready var _score_label: Label = $HUD/Score
+@onready var _message_label: Label = $HUD/Message
 @onready var _field: MeshInstance3D = $Field
 @onready var _center_line: MeshInstance3D = $Field/CenterLine
 
@@ -48,6 +49,8 @@ func _unhandled_input(event: InputEvent) -> void:
         _player.turn(-event.relative.x * MOUSE_SENSITIVITY)
     if event.is_action_pressed("bounce"):
         _player.bounce(game.ball)
+    if event.is_action_pressed("restart") and game.status == GameStatus.OVER:
+        game.start()
 
 func _process(delta: float) -> void:
     var input_vector := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
@@ -56,7 +59,25 @@ func _process(delta: float) -> void:
     game.tick(delta)
     _camera.position = _player.position + Vector3.UP * EYE_HEIGHT
     _camera.look_at(_camera.position + _player.facing)
-    _score_label.text = "%d : %d   %s   %s" % [game.goals[0].score, game.goals[1].score, _format_time(game.remaining_time()), game.status]
+    var opponent_team := game.opponent_goal_of(_player.team).team
+    _score_label.text = "나 %d : %d 상대   %s" % [game.score_of(_player.team), game.score_of(opponent_team), _format_time(game.remaining_time())]
+    _message_label.text = _message()
+
+func _message() -> String:
+    match game.status:
+        GameStatus.GOAL:
+            return "GOAL!"
+        GameStatus.OVER:
+            return "%s\nR 키로 다시 시작" % _result()
+    return ""
+
+func _result() -> String:
+    var winner := game.winner()
+    if winner == Character.NO_TEAM:
+        return "DRAW"
+    if winner == _player.team:
+        return "WIN"
+    return "LOSE"
 
 func _format_time(seconds: float) -> String:
     # 종료 직전 마지막 tick 에서 살짝 음수가 될 수 있어 0 에서 멈춥니다.
