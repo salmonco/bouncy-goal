@@ -12,9 +12,9 @@ var _elapsed_time: float = 0.0
 var _forward_goal := goals[0]
 var _back_goal := goals[1]
 
-func _init(_character: Array[Character] = []) -> void:
+func _init(_characters: Array[Character] = []) -> void:
     ball = Ball.new()
-    characters = _character
+    characters = _characters
 
 func tick(delta: float) -> void:
     if status == GameStatus.WAITING or status == GameStatus.OVER:
