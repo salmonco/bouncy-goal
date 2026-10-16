@@ -70,6 +70,19 @@ func test_캐릭터는_얼굴_방향_기준으로_월드에서의_이동_방향�
     character.move_input = Vector3.RIGHT
     assert_vector(character.world_move_direction()).is_equal_approx(Vector3.BACK, EPSILON)
 
+func test_캐릭터는_대각선으로_이동할_수_있다() -> void:
+    var character := Character.new()
+    character.facing = Vector3.FORWARD
+    character.move_input = (Vector3.FORWARD + Vector3.LEFT).normalized()
+    assert_vector(character.world_move_direction()).is_equal_approx((Vector3.FORWARD + Vector3.LEFT).normalized(), EPSILON)
+    character.move_input = (Vector3.BACK + Vector3.RIGHT).normalized()
+    assert_vector(character.world_move_direction()).is_equal_approx((Vector3.BACK + Vector3.RIGHT).normalized(), EPSILON)
+    character.facing = Vector3.RIGHT
+    character.move_input = (Vector3.FORWARD + Vector3.LEFT).normalized()
+    assert_vector(character.world_move_direction()).is_equal_approx((Vector3.RIGHT + Vector3.FORWARD).normalized(), EPSILON)
+    character.move_input = (Vector3.BACK + Vector3.RIGHT).normalized()
+    assert_vector(character.world_move_direction()).is_equal_approx((Vector3.LEFT + Vector3.BACK).normalized(), EPSILON)
+
 func test_캐릭터는_이동_방향이_없으면_월드의_이동_방향_또한_없다() -> void:
     var character := Character.new()
     character.move_input = Vector3.ZERO
