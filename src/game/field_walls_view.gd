@@ -4,7 +4,7 @@ extends Node3D
 # 코어(Game)의 경기장 경계에 낮은 벽을 세웁니다. 벽 안쪽 면이 경계선에 맞도록 바깥으로 두께의 절반만큼 밀어둡니다.
 # 앞뒤 벽은 골대 입구(Goal.WIDTH)만큼 비워둡니다.
 
-# 공(지름 BallView.RADIUS * 2)이 넘어가 보이지 않을 만큼, 골대(GoalView.POST_HEIGHT)보다는 낮게.
+# 공(지름 Ball.RADIUS * 2)이 넘어가 보이지 않을 만큼, 골대(GoalView.POST_HEIGHT)보다는 낮게.
 const HEIGHT := 40.0
 const THICKNESS := 10.0
 const COLOR := Color(0.9, 0.9, 0.9)

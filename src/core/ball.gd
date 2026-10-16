@@ -2,6 +2,7 @@ class_name Ball
 extends RefCounted
 
 const POSITION := Vector3.ZERO
+const RADIUS := 15.0
 const FRICTION := 50.0
 
 var position: Vector3

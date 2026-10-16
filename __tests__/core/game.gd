@@ -146,19 +146,19 @@ func test_골_상태에서도_공과_캐릭터는_움직인다() -> void:
 func test_공은_골망_뒤로_빠져나가지_않는다() -> void:
     var game := Game.new()
     game.start()
-    game.ball.position = Vector3(0, 0, -(Game.FIELD_LENGTH / 2 + Goal.DEPTH - 1))
+    game.ball.position = Vector3(0, 0, -(Game.FIELD_LENGTH / 2 + Goal.DEPTH - Ball.RADIUS - 1))
     game.ball.velocity = Vector3.FORWARD * 100
     game.tick(0.1)
-    assert_float(game.ball.position.z).is_greater_equal(-(Game.FIELD_LENGTH / 2 + Goal.DEPTH))
+    assert_float(game.ball.position.z).is_greater_equal(-(Game.FIELD_LENGTH / 2 + Goal.DEPTH - Ball.RADIUS))
     assert_float(game.ball.velocity.z).is_greater(0)
 
 func test_공은_골망_옆으로_빠져나가지_않는다() -> void:
     var game := Game.new()
     game.start()
-    game.ball.position = Vector3(Goal.WIDTH / 2 - 1, 0, -(Game.FIELD_LENGTH / 2 + 10))
+    game.ball.position = Vector3(Goal.WIDTH / 2 - Ball.RADIUS - 1, 0, -(Game.FIELD_LENGTH / 2 + 10))
     game.ball.velocity = Vector3.RIGHT * 100
     game.tick(0.1)
-    assert_float(game.ball.position.x).is_less_equal(Goal.WIDTH / 2)
+    assert_float(game.ball.position.x).is_less_equal(Goal.WIDTH / 2 - Ball.RADIUS)
     assert_float(game.ball.position.z).is_less(-Game.FIELD_LENGTH / 2)
 
 func test_골_상태가_끝나기_전에는_리셋되지_않는다() -> void:
@@ -278,7 +278,7 @@ func test_시간이_흐르면_공이_움직인다() -> void:
 func test_공이_옆_벽에_닿으면_x_속도가_반대로_바뀐다() -> void:
     var game := Game.new()
     game.start()
-    game.ball.position = Vector3.RIGHT * (Game.FIELD_WIDTH / 2 - 1)
+    game.ball.position = Vector3.RIGHT * (Game.FIELD_WIDTH / 2 - Ball.RADIUS - 1)
     game.ball.velocity = Vector3(100, 0, -100)
     game.tick(0.1)
     assert_float(game.ball.velocity.x).is_less(0)
@@ -287,7 +287,7 @@ func test_공이_옆_벽에_닿으면_x_속도가_반대로_바뀐다() -> void:
 func test_공이_반대쪽_옆_벽에_닿아도_x_속도가_반대로_바뀐다() -> void:
     var game := Game.new()
     game.start()
-    game.ball.position = Vector3.LEFT * (Game.FIELD_WIDTH / 2 - 1)
+    game.ball.position = Vector3.LEFT * (Game.FIELD_WIDTH / 2 - Ball.RADIUS - 1)
     game.ball.velocity = Vector3(-100, 0, -100)
     game.tick(0.1)
     assert_float(game.ball.velocity.x).is_greater(0)
@@ -296,15 +296,15 @@ func test_공이_반대쪽_옆_벽에_닿아도_x_속도가_반대로_바뀐다(
 func test_공은_옆_벽_밖으로_나가지_않는다() -> void:
     var game := Game.new()
     game.start()
-    game.ball.position = Vector3.RIGHT * (Game.FIELD_WIDTH / 2 - 1)
+    game.ball.position = Vector3.RIGHT * (Game.FIELD_WIDTH / 2 - Ball.RADIUS - 1)
     game.ball.velocity = Vector3.RIGHT * 100
     game.tick(0.1)
-    assert_float(game.ball.position.x).is_less_equal(Game.FIELD_WIDTH / 2)
+    assert_float(game.ball.position.x).is_less_equal(Game.FIELD_WIDTH / 2 - Ball.RADIUS)
 
 func test_공이_앞_벽에_닿으면_z_속도가_반대로_바뀐다() -> void:
     var game := Game.new()
     game.start()
-    game.ball.position = Vector3(200, 0, -(Game.FIELD_LENGTH / 2 - 1))
+    game.ball.position = Vector3(200, 0, -(Game.FIELD_LENGTH / 2 - Ball.RADIUS - 1))
     game.ball.velocity = Vector3(100, 0, -100)
     game.tick(0.1)
     assert_float(game.ball.velocity.z).is_greater(0)
@@ -313,7 +313,7 @@ func test_공이_앞_벽에_닿으면_z_속도가_반대로_바뀐다() -> void:
 func test_공이_뒤_벽에_닿아도_z_속도가_반대로_바뀐다() -> void:
     var game := Game.new()
     game.start()
-    game.ball.position = Vector3(200, 0, Game.FIELD_LENGTH / 2 - 1)
+    game.ball.position = Vector3(200, 0, Game.FIELD_LENGTH / 2 - Ball.RADIUS - 1)
     game.ball.velocity = Vector3(100, 0, 100)
     game.tick(0.1)
     assert_float(game.ball.velocity.z).is_less(0)
@@ -322,10 +322,10 @@ func test_공이_뒤_벽에_닿아도_z_속도가_반대로_바뀐다() -> void:
 func test_공은_앞뒤_벽_밖으로_나가지_않는다() -> void:
     var game := Game.new()
     game.start()
-    game.ball.position = Vector3(200, 0, -(Game.FIELD_LENGTH / 2 - 1))
+    game.ball.position = Vector3(200, 0, -(Game.FIELD_LENGTH / 2 - Ball.RADIUS - 1))
     game.ball.velocity = Vector3.FORWARD * 100
     game.tick(0.1)
-    assert_float(game.ball.position.z).is_greater_equal(-Game.FIELD_LENGTH / 2)
+    assert_float(game.ball.position.z).is_greater_equal(-(Game.FIELD_LENGTH / 2 - Ball.RADIUS))
 
 func test_공이_골대_입구로_가면_벽에_튕기지_않고_골이_된다() -> void:
     var game := Game.new()

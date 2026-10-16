@@ -1,8 +1,6 @@
 class_name BallView
 extends Node3D
 
-const RADIUS := 15.0
-
 var ball: Ball
 
 func _init(_ball: Ball) -> void:
@@ -10,11 +8,11 @@ func _init(_ball: Ball) -> void:
 
 func _ready() -> void:
     var sphere := SphereMesh.new()
-    sphere.radius = RADIUS
-    sphere.height = RADIUS * 2
+    sphere.radius = Ball.RADIUS
+    sphere.height = Ball.RADIUS * 2
     var body := Shapes.mesh(sphere, Color.WHITE)
     # 코어의 position 은 공의 바닥 기준이라, 땅에 묻히지 않게 반지름만큼 띄웁니다.
-    body.position.y = RADIUS
+    body.position.y = Ball.RADIUS
     add_child(body)
 
 func _process(_delta: float) -> void:

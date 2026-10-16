@@ -30,3 +30,6 @@ func test_공은_속도가_줄어들다가_멈춘다() -> void:
     ball.velocity = Vector3.FORWARD * 10
     ball.move(100.0)
     assert_vector(ball.velocity).is_equal(Vector3.ZERO)
+
+func test_공은_반지름을_가진다() -> void:
+    assert_float(Ball.RADIUS).is_greater(0)

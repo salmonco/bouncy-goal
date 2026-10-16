@@ -48,14 +48,14 @@ func tick(delta: float) -> void:
         character.move(delta)
         character.position.x = clamp(character.position.x, -FIELD_WIDTH / 2, FIELD_WIDTH / 2)
         character.position.z = clamp(character.position.z, -FIELD_LENGTH / 2, FIELD_LENGTH / 2)
-    var was_past_goal_line := absf(ball.position.z) > FIELD_LENGTH / 2
+    var was_past_goal_line := absf(ball.position.z) > FIELD_LENGTH / 2 - Ball.RADIUS
     ball.move(delta)
-    var half_width := Goal.WIDTH / 2 if was_past_goal_line else FIELD_WIDTH / 2
+    var half_width := (Goal.WIDTH / 2 if was_past_goal_line else FIELD_WIDTH / 2) - Ball.RADIUS
     if absf(ball.position.x) > half_width:
         ball.velocity.x = -ball.velocity.x
         ball.position.x = clamp(ball.position.x, -half_width, half_width)
-    var is_within_goal_width := absf(ball.position.x) <= Goal.WIDTH / 2
-    var half_length := FIELD_LENGTH / 2 + Goal.DEPTH if is_within_goal_width else FIELD_LENGTH / 2
+    var is_within_goal_width := absf(ball.position.x) <= Goal.WIDTH / 2 - Ball.RADIUS
+    var half_length := (FIELD_LENGTH / 2 + Goal.DEPTH if is_within_goal_width else FIELD_LENGTH / 2) - Ball.RADIUS
     if absf(ball.position.z) > half_length:
         ball.velocity.z = -ball.velocity.z
         ball.position.z = clamp(ball.position.z, -half_length, half_length)
