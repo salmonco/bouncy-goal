@@ -3,6 +3,7 @@ extends Node3D
 
 # 눈 행성(라비네)의 골대를 그립니다. 기둥과 크로스바 위에는 눈이 쌓이고, 크로스바 아래로 고드름이 매달립니다.
 # 그물은 흰 밧줄의 마름모 그물코이고, 뒤·양옆·위 네 면이 바깥으로 살짝 처집니다. 골대 입구는 비어 있습니다.
+# 골이 들어가면(점수가 오르면) 골대 앞에서 얼음 눈보라(BlizzardEffect)가 휘몰아치고 그물이 출렁입니다.
 
 const POST_HEIGHT := Goal.HEIGHT
 const POST_THICKNESS := 5.0
@@ -24,7 +25,21 @@ const NET_SAG := 6.0
 const NET_SUBDIVISIONS := 16
 const NET_SHADER := preload("res://assets/materials/net.gdshader")
 
+# 골 연출: 그물이 이 세기로 출렁이다가 잦아듭니다.
+const NET_WOBBLE := 14.0
+const NET_WOBBLE_SPEED := 18.0
+const NET_WOBBLE_DECAY := 2.5
+# 눈보라가 일어나는 곳의 골라인에서 경기장 쪽으로의 거리입니다.
+const BLIZZARD_DISTANCE := 40.0
+
 var goal: Goal
+
+# 그물 판과 평소 처짐입니다. 출렁일 때 평소 처짐에 흔들림을 더합니다.
+var _net_panels: Array[MeshInstance3D] = []
+var _net_sags: Array[float] = []
+var _scored_score := 0
+# 골이 들어간 뒤 지난 시간입니다. 음수면 출렁이지 않습니다.
+var _wobble_time := -1.0
 
 func _init(_goal: Goal) -> void:
     goal = _goal
@@ -67,6 +82,8 @@ func _add_net(material: ShaderMaterial, size: Vector2, orientation: PlaneMesh.Or
     instance.set_instance_shader_parameter("sag", sag)
     instance.position = center
     add_child(instance)
+    _net_panels.append(instance)
+    _net_sags.append(sag)
 
 func _add_snow_and_icicles() -> void:
     var half_width := Goal.WIDTH / 2
@@ -92,5 +109,30 @@ func _add_snow_and_icicles() -> void:
         icicle.position = Vector3(x, POST_HEIGHT - POST_THICKNESS / 2 - length / 2, 0)
         add_child(icicle)
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
     position = goal.position
+    # 점수는 새 경기에서 0 으로 돌아가므로, 오를 때만 골로 칩니다.
+    if goal.score > _scored_score:
+        _celebrate()
+    _scored_score = goal.score
+    _wobble(delta)
+
+func _celebrate() -> void:
+    _wobble_time = 0.0
+    # 골대 입구 바로 앞(경기장 쪽) 바닥에서 눈보라가 일어납니다.
+    var blizzard := BlizzardEffect.new()
+    blizzard.position = Vector3(0, 0, -signf(goal.position.z) * BLIZZARD_DISTANCE)
+    add_child(blizzard)
+
+func _wobble(delta: float) -> void:
+    if _wobble_time < 0.0:
+        return
+    _wobble_time += delta
+    var shake := sin(_wobble_time * NET_WOBBLE_SPEED) * exp(-_wobble_time * NET_WOBBLE_DECAY) * NET_WOBBLE
+    var done := exp(-_wobble_time * NET_WOBBLE_DECAY) < 0.02
+    for i in _net_panels.size():
+        # 평소 처지는 방향으로 더 부풀었다 덜 부풀었다 합니다.
+        var sag := _net_sags[i]
+        _net_panels[i].set_instance_shader_parameter("sag", sag if done else sag + signf(sag) * shake)
+    if done:
+        _wobble_time = -1.0

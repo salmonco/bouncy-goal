@@ -26,11 +26,18 @@ const MARKER_FLATNESS := 0.1
 const MARKER_SHRINK_HEIGHT := 300.0
 const MARKER_MIN_SCALE := 0.4
 
+# 공이 땅에 떨어진 순간을 알립니다. 효과음을 내는 데 씁니다. at 은 떨어진 곳입니다.
+signal landed(at: Vector3)
+
+# 이보다 느리게 떨어지면 알리지 않습니다. 땅에서 미세하게 튀는 경우입니다.
+const LANDING_MIN_SPEED := 40.0
+
 var ball: Ball
 
 var _body: MeshInstance3D
 var _marker: MeshInstance3D
 var _last_position: Vector3
+var _last_velocity: Vector3
 
 func _init(_ball: Ball) -> void:
     ball = _ball
@@ -53,10 +60,18 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
     position = ball.position
     _roll()
+    _detect_landing()
     # 공을 따라 함께 뜨지 않도록, 공의 높이만큼 도로 내려 바닥에 붙입니다.
     _marker.position.y = MARKER_HEIGHT - ball.position.y
     var shrink := lerpf(1.0, MARKER_MIN_SCALE, clampf(ball.position.y / MARKER_SHRINK_HEIGHT, 0.0, 1.0))
     _marker.scale = Vector3(shrink, MARKER_FLATNESS, shrink)
+
+# 코어는 땅에 떨어지면 위아래 속도를 뒤집으므로, 떨어지던 공이 땅에서 위로 바뀐 것으로 알아냅니다.
+func _detect_landing() -> void:
+    var falling_speed := -_last_velocity.y
+    _last_velocity = ball.velocity
+    if falling_speed > LANDING_MIN_SPEED and ball.velocity.y >= 0.0 and ball.position.y <= 0.01:
+        landed.emit(ball.position + Vector3.UP * Ball.RADIUS)
 
 # 수평으로 굴러간 거리만큼, 진행 방향에 수직인 축으로 공을 돌립니다(거리 = 반지름 × 각도).
 func _roll() -> void:

@@ -194,17 +194,20 @@ func _add_cloud() -> void:
 
 # 경기장 위 넓은 상자에서 눈송이가 천천히 흩날리며 내립니다.
 func _add_snowfall() -> void:
-    var flake := SphereMesh.new()
-    flake.radius = 1.6
-    flake.height = 3.2
-    flake.radial_segments = 6
-    flake.rings = 3
+    # 눈 결정 모양이 잘 보이도록 늘 카메라를 보게 하고, 저마다 다른 각도로 천천히 돌게 합니다.
+    var flake := Shapes.snowflake_mesh(3.4)
     var material := StandardMaterial3D.new()
     material.albedo_color = SNOW_COLOR
     material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-    flake.material = material
+    material.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+    material.cull_mode = BaseMaterial3D.CULL_DISABLED
+    flake.surface_set_material(0, material)
     var snowfall := CPUParticles3D.new()
     snowfall.mesh = flake
+    snowfall.angle_min = 0.0
+    snowfall.angle_max = 60.0
+    snowfall.angular_velocity_min = -45.0
+    snowfall.angular_velocity_max = 45.0
     snowfall.amount = SNOWFALL_AMOUNT
     snowfall.lifetime = 12.0
     snowfall.preprocess = 12.0

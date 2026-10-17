@@ -46,6 +46,37 @@ static func mesh(primitive: Mesh, color: Color, outline: ShaderMaterial = null) 
     instance.material_override = material
     return instance
 
+# 여섯 갈래로 뻗은 납작한 눈 결정(❄)입니다. XY 평면에 놓이고 앞(-Z)을 봅니다.
+# 가운데 육각형에서 가는 마름모 갈래 여섯 개가 뻗고, 갈래마다 바깥쪽으로 비스듬한 곁가지 두 개가 달립니다.
+# 앞뒤 어느 쪽에서도 보이도록, 쓰는 쪽 재질에서 뒷면 제거를 꺼야 합니다.
+static func snowflake_mesh(radius: float) -> ArrayMesh:
+    var surface := SurfaceTool.new()
+    surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+    surface.set_normal(Vector3.BACK)
+    for i in 6:
+        var corner := _polar(radius * 0.22, TAU * i / 6.0)
+        var next := _polar(radius * 0.22, TAU * (i + 1) / 6.0)
+        for v in [Vector2.ZERO, corner, next]:
+            surface.add_vertex(Vector3(v.x, v.y, 0))
+    for i in 6:
+        var angle := TAU * i / 6.0 + TAU / 12.0
+        _add_diamond(surface, Vector2.ZERO, _polar(radius, angle), radius * 0.09)
+        var branch_root := _polar(radius * 0.55, angle)
+        for side in [-1, 1]:
+            _add_diamond(surface, branch_root, branch_root + _polar(radius * 0.32, angle + side * PI / 4), radius * 0.06)
+    return surface.commit()
+
+static func _polar(length: float, angle: float) -> Vector2:
+    return Vector2(sin(angle), cos(angle)) * length
+
+# from 에서 to 로 뻗는 가는 마름모입니다. 가장 넓은 곳은 길이의 35% 지점이고, 그 폭의 절반이 half_width 입니다.
+static func _add_diamond(surface: SurfaceTool, from: Vector2, to: Vector2, half_width: float) -> void:
+    var along := to - from
+    var side := Vector2(-along.y, along.x).normalized() * half_width
+    var widest := from + along * 0.35
+    for v in [from, widest + side, to, from, to, widest - side]:
+        surface.add_vertex(Vector3(v.x, v.y, 0))
+
 static func box(size: Vector3, color: Color) -> MeshInstance3D:
     var primitive := BoxMesh.new()
     primitive.size = size
