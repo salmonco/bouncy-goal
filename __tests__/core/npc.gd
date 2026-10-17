@@ -67,3 +67,11 @@ func test_NPC는_찬_공보다_느리게_움직인다() -> void:
     npc.move_input = Vector3.FORWARD
     npc.move(1.0)
     assert_float(npc.position.length()).is_less(Character.POWER)
+
+func test_NPC는_구석의_공을_벽이_아닌_상대_골대_쪽으로_찬다() -> void:
+    var npc := Npc.new(Vector3(370, 0, -897), Vector3.FORWARD)
+    var ball := Ball.new(Vector3(375, 0, -975))
+    var goal := Goal.new(Vector3(0, 0, -1000))
+    npc.think(ball, goal)
+    var to_goal := (goal.position - ball.position).normalized()
+    assert_vector(Vector3(ball.velocity.x, 0, ball.velocity.z).normalized()).is_equal_approx(to_goal, EPSILON)

@@ -17,10 +17,11 @@ func think(ball: Ball, target_goal: Goal) -> void:
         return
     if to_ball == Vector3.ZERO:
         return
-    facing = to_ball.normalized()
     if to_ball.length() <= BOUNCE_RANGE:
+        facing = to_goal
         move_input = Vector3.ZERO
     else:
+        facing = to_ball.normalized()
         move_input = Vector3.FORWARD
     bounce(ball)
 
