@@ -48,6 +48,7 @@ func _unhandled_input(event: InputEvent) -> void:
         Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
     if event is InputEventMouseMotion:
         _player.turn(-event.relative.x * MOUSE_SENSITIVITY)
+        _player.tilt(-event.relative.y * MOUSE_SENSITIVITY)
     if event.is_action_pressed("bounce"):
         _player.bounce(game.ball)
     if event.is_action_pressed("restart") and game.status == GameStatus.OVER:
@@ -59,7 +60,7 @@ func _process(delta: float) -> void:
     _npc.think(game.ball, game.opponent_goal_of(_npc.team))
     game.tick(delta)
     _camera.position = _player.position + Vector3.UP * EYE_HEIGHT
-    _camera.look_at(_camera.position + _player.facing)
+    _camera.look_at(_camera.position + _player.aim())
     var opponent_team := game.opponent_goal_of(_player.team).team
     # 1인칭이라 내 몸이 안 보이니, 점수를 각 팀 색으로 칠해 어느 편인지 알려줍니다.
     _score_label.text = "[center][color=%s]나 %d[/color] : [color=%s]%d 상대[/color]   %s[/center]" % [

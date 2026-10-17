@@ -2,11 +2,11 @@ class_name Ball
 extends RefCounted
 
 const POSITION := Vector3.ZERO
-const RADIUS := 15.0
-const FRICTION := 50.0
-const GRAVITY := 800.0
-const RESTITUTION := 0.5
-const MIN_BOUNCE_SPEED := 30.0
+const RADIUS := 25.0
+const FRICTION := 100.0
+const GRAVITY := 300.0
+const RESTITUTION := 0.8
+const MIN_BOUNCE_SPEED := 15.0
 
 var position: Vector3
 var velocity: Vector3 = Vector3.ZERO

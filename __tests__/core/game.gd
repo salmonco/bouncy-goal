@@ -245,7 +245,7 @@ func test_캐릭터가_공을_튀기면_공의_속도가_바뀐다() -> void:
     player.facing = Vector3.FORWARD
     game.ball.position = Vector3.FORWARD * 10
     player.bounce(game.ball)
-    assert_vector(game.ball.velocity).is_equal(player.facing * Character.POWER + Vector3.UP * Character.LIFT)
+    assert_vector(Vector3(game.ball.velocity.x, 0, game.ball.velocity.z).normalized()).is_equal_approx(player.facing, EPSILON)
 
 func test_캐릭터가_공을_튀기지_못하면_공의_속도는_그대로다() -> void:
     var characters: Array[Character] = [Character.new(), Character.new()]

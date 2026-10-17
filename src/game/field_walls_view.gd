@@ -5,7 +5,7 @@ extends Node3D
 # 앞뒤 벽은 골대 입구(Goal.WIDTH)만큼 비워둡니다.
 
 # 공(지름 Ball.RADIUS * 2)이 넘어가 보이지 않을 만큼, 골대(GoalView.POST_HEIGHT)보다는 낮게.
-const HEIGHT := 40.0
+const HEIGHT := 50.0
 const THICKNESS := 10.0
 const COLOR := Color(0.9, 0.9, 0.9)
 
