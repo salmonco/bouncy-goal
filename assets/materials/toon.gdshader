@@ -19,13 +19,22 @@ uniform bool draw_face = false;
 uniform vec2 eye_center = vec2(3.9, -4.9);
 uniform vec2 eye_radius = vec2(1.5, 2.5);
 uniform vec3 eye_color : source_color = vec3(0.12, 0.10, 0.14);
-uniform vec2 shine_offset = vec2(-0.45, 0.9);
-uniform float shine_radius = 0.6;
-uniform vec2 mouth_center = vec2(0.0, -8.9);
-uniform float mouth_radius = 0.45;
+// 눈 윗부분을 비스듬히 깎아 눈꼬리가 올라간 의욕 넘치는 눈매를 만듭니다.
+// eye_cut_height 는 눈 가운데에서 깎는 높이(눈 세로 반지름에 대한 비율), eye_slant 는 바깥으로 갈수록 올라가는 기울기입니다.
+uniform float eye_cut_height = 0.45;
+uniform float eye_slant = 0.45;
+// 하이라이트는 눈 바깥쪽 위에 둡니다. x 는 눈 바깥 방향 기준입니다.
+uniform vec2 shine_offset = vec2(0.35, 0.2);
+uniform float shine_radius = 0.55;
+// 크게 벌린 입: 윗선은 평평하고 아래는 둥근 반달 모양에, 안쪽 아래에 혀를 그립니다.
+uniform vec2 mouth_center = vec2(0.0, -8.4);
+uniform vec2 mouth_radius = vec2(1.7, 1.5);
+uniform vec3 mouth_color : source_color = vec3(0.35, 0.10, 0.14);
+uniform vec3 tongue_color : source_color = vec3(1.0, 0.50, 0.55);
 uniform vec2 blush_center = vec2(6.8, -7.8);
 uniform vec2 blush_radius = vec2(2.0, 1.1);
 uniform vec3 blush_color : source_color = vec3(1.0, 0.68, 0.72);
+uniform float blush_strength = 0.3;
 
 varying vec3 local_position;
 
@@ -40,6 +49,12 @@ float ellipse(vec2 p, vec2 center, vec2 radius) {
 	return 1.0 - smoothstep(-aa, aa, d);
 }
 
+// value 가 limit 보다 작으면 1, 크면 0. 경계는 부드럽게 합니다.
+float below(float value, float limit) {
+	float aa = fwidth(value);
+	return 1.0 - smoothstep(-aa, aa, value - limit);
+}
+
 void fragment() {
 	vec3 color = albedo;
 	if (draw_face && local_position.z < 0.0) {
@@ -47,15 +62,16 @@ void fragment() {
 		// 좌우 대칭이므로 x 를 절댓값으로 접어 한쪽만 계산합니다.
 		vec2 mirrored = vec2(abs(p.x), p.y);
 		float blush = ellipse(mirrored, blush_center, blush_radius);
-		color = mix(color, blush_color, blush * 0.7);
-		float eye = ellipse(mirrored, eye_center, eye_radius);
+		color = mix(color, blush_color, blush * blush_strength);
+		// 눈 안쪽(코 쪽)으로 갈수록 낮게 깎여 눈꼬리가 올라갑니다.
+		float cut = eye_center.y + eye_radius.y * eye_cut_height + (mirrored.x - eye_center.x) * eye_slant;
+		float eye = ellipse(mirrored, eye_center, eye_radius) * below(mirrored.y, cut);
 		color = mix(color, eye_color, eye);
-		// 하이라이트는 두 눈 모두 같은 쪽(왼쪽 위)에 둡니다.
-		vec2 eye_side = vec2(sign(p.x) * eye_center.x, eye_center.y);
-		float shine = ellipse(p, eye_side + shine_offset, vec2(shine_radius));
+		float shine = ellipse(mirrored, eye_center + shine_offset, vec2(shine_radius));
 		color = mix(color, vec3(1.0), shine * eye);
-		float mouth = ellipse(p, mouth_center, vec2(mouth_radius));
-		color = mix(color, eye_color, mouth);
+		float mouth = ellipse(p, mouth_center, mouth_radius) * below(p.y, mouth_center.y);
+		float tongue = ellipse(p, mouth_center - vec2(0.0, mouth_radius.y * 0.8), mouth_radius * vec2(0.6, 0.5));
+		color = mix(color, mix(mouth_color, tongue_color, tongue), mouth);
 	}
 	ALBEDO = color;
 	ROUGHNESS = 1.0;

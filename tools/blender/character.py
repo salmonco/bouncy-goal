@@ -2,7 +2,8 @@
 #
 #   사용법: blender -b -P tools/blender/character.py -- <출력.glb> [미리보기.png]
 #
-# 머리가 키의 절반쯤 되는 2.5등신입니다. 노란 머리에 뾰족한 앞머리, 흰 카라 반팔 셔츠, 연보라 청바지,
+# 머리가 키의 절반쯤 되는 2.5등신입니다. 옆과 뒤가 바깥으로 뻗친 은회색 머리(이나즈마 일레븐의 후부키 시로처럼)에
+# 뾰족한 앞머리, 흰 카라 반팔 셔츠, 연보라 청바지,
 # 고양이 얼굴 슬리퍼를 신고, 눈 행성(라비네)에 맞춰 목도리를 둘렀습니다.
 # 크기는 Godot 단위 그대로입니다. 키 50 (Character 의 눈높이 40 기준).
 #
@@ -45,10 +46,13 @@ def material(name, color, roughness=0.8):
 
 TEAM = material("Team", (0.85, 0.85, 0.9))
 SKIN = material("Skin", (1.0, 0.92, 0.84))
-HAIR = material("Hair", (1.0, 0.85, 0.45), roughness=0.6)
+# 푸른 기가 도는 은회색입니다.
+HAIR = material("Hair", (0.80, 0.83, 0.90), roughness=0.6)
 SHIRT = material("Shirt", (0.98, 0.98, 0.97))
 JEANS = material("Jeans", (0.62, 0.65, 0.98))
 SLIPPER = material("Slipper", (1.0, 1.0, 1.0))
+# Blender 색은 선형(linear) 값이라 Godot 에서는 더 밝아집니다(0.06 → 약 0.28). 짙은 눈썹이 되도록 아주 어둡게 줍니다.
+BROW = material("Brow", (0.05, 0.06, 0.10))
 INK = material("Ink", (0.10, 0.08, 0.10), roughness=0.3)
 
 
@@ -241,6 +245,28 @@ for i, (angle, tip_z, width) in enumerate([
     normal = (on_head(angle, middle_z, outward=1.0) - on_head(angle, middle_z)).normalized()
     spike(f"Bang.{i}.root", base, middle, width, HAIR, head, flat_normal=normal, tip_radius=width * 0.6)
     spike(f"Bang.{i}", middle, tip, width * 0.6, HAIR, head, flat_normal=normal)
+
+# 옆·뒷머리 끝이 바깥으로 휙 뻗칩니다. 머리 다발은 아래로 흘러내리다(뿌리 마디) 끝이 바깥 위로 뒤집힙니다(끝 마디).
+# 납작한 면이 위를 보게 눌러, 옆에서 보면 얇고 위에서 보면 넓은 다발이 됩니다. 뿌리는 머리카락 속에 묻습니다.
+def flick(name, angle, z, reach, width):
+    base = on_head(angle, z + 4.0, outward=-1.0)
+    bend = on_head(angle, z - 1.0, outward=1.6)
+    tip = on_head(angle, z + 1.8, outward=reach)
+    spike(f"{name}.root", base, bend, width, HAIR, head, flat_normal=(0, 0, 1), flatness=0.45, tip_radius=width * 0.75)
+    spike(name, bend, tip, width * 0.75, HAIR, head, flat_normal=(0, 0, 1), flatness=0.45)
+
+
+for side in (-1, 1):
+    for angle, z, reach, width in [(84, 35.0, 4.5, 4.4), (104, 33.6, 5.2, 4.8), (124, 32.0, 5.0, 4.8), (146, 30.4, 4.6, 4.6), (166, 29.2, 4.0, 4.2)]:
+        flick(f"Flick.{side}.{angle}", side * angle, z, reach, width)
+flick("Flick.back", 180, 28.8, 3.6, 4.2)
+
+# 눈썹: 안쪽이 내려간 짙은 일자 눈썹으로 의욕 넘치는 표정을 만듭니다.
+# 얼굴에 그리면 앞머리에 가려지므로, 애니메이션처럼 앞머리 위에 보이도록 머리 밖으로 띄운 입체로 둡니다.
+for side in (-1, 1):
+    inner = on_head(side * 7, 33.9, outward=1.6)
+    outer = on_head(side * 33, 36.8, outward=1.6)
+    capsule(f"Brow.{side}", inner, outer, 0.45, BROW, head)
 
 # --- 내보내기 ---------------------------------------------------------------
 bpy.ops.object.select_all(action="SELECT")
