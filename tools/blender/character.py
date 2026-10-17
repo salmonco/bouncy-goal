@@ -47,12 +47,11 @@ def material(name, color, roughness=0.8):
 TEAM = material("Team", (0.85, 0.85, 0.9))
 SKIN = material("Skin", (1.0, 0.92, 0.84))
 # 푸른 기가 도는 은회색입니다.
+# Blender 색은 선형(linear) 값이라 Godot 에서는 더 밝아집니다(0.06 → 약 0.28). 짙은 색이 필요하면 생각보다 어둡게 줍니다.
 HAIR = material("Hair", (0.80, 0.83, 0.90), roughness=0.6)
 SHIRT = material("Shirt", (0.98, 0.98, 0.97))
 JEANS = material("Jeans", (0.62, 0.65, 0.98))
 SLIPPER = material("Slipper", (1.0, 1.0, 1.0))
-# Blender 색은 선형(linear) 값이라 Godot 에서는 더 밝아집니다(0.06 → 약 0.28). 짙은 눈썹이 되도록 아주 어둡게 줍니다.
-BROW = material("Brow", (0.05, 0.06, 0.10))
 INK = material("Ink", (0.10, 0.08, 0.10), roughness=0.3)
 
 
@@ -261,12 +260,12 @@ for side in (-1, 1):
         flick(f"Flick.{side}.{angle}", side * angle, z, reach, width)
 flick("Flick.back", 180, 28.8, 3.6, 4.2)
 
-# 눈썹: 안쪽이 내려간 짙은 일자 눈썹으로 의욕 넘치는 표정을 만듭니다.
+# 눈썹: 안쪽이 내려간 일자 눈썹으로 의욕 넘치는 표정을 만듭니다. 머리카락과 같은 색이고, 툰 외곽선이 윤곽을 그립니다.
 # 얼굴에 그리면 앞머리에 가려지므로, 애니메이션처럼 앞머리 위에 보이도록 머리 밖으로 띄운 입체로 둡니다.
 for side in (-1, 1):
     inner = on_head(side * 7, 33.9, outward=1.6)
     outer = on_head(side * 33, 36.8, outward=1.6)
-    capsule(f"Brow.{side}", inner, outer, 0.45, BROW, head)
+    capsule(f"Brow.{side}", inner, outer, 0.45, HAIR, head)
 
 # --- 내보내기 ---------------------------------------------------------------
 bpy.ops.object.select_all(action="SELECT")
