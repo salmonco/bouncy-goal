@@ -6,8 +6,6 @@ extends Node3D
 @onready var _sun: DirectionalLight3D = $Sun
 @onready var _score_label: RichTextLabel = $HUD/Score
 @onready var _message_label: Label = $HUD/Message
-@onready var _field: MeshInstance3D = $Field
-@onready var _center_line: MeshInstance3D = $Field/CenterLine
 
 const MOUSE_SENSITIVITY := 0.003
 const EYE_HEIGHT := 40.0
@@ -21,16 +19,14 @@ func _ready() -> void:
 
     _sun.rotation_degrees = Vector3(-55, 30, 0)
 
-    # 경기장 크기는 코어(Game)의 상수를 따릅니다. 씬의 값은 에디터 미리보기용입니다.
-    (_field.mesh as PlaneMesh).size = Vector2(Game.FIELD_WIDTH, Game.FIELD_LENGTH)
-    (_center_line.mesh as BoxMesh).size.x = Game.FIELD_WIDTH
-
     # 시작 위치는 game.start() 에서 팀이 정해질 때 배치됩니다.
     _player = Character.new()
     _npc = Npc.new()
     var characters: Array[Character] = [_player, _npc]
     game = Game.new(characters)
 
+    add_child(PlanetView.new())
+    add_child(FieldView.new())
     add_child(FieldWallsView.new())
     for goal in game.goals:
         add_child(GoalView.new(goal))
