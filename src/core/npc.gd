@@ -8,11 +8,12 @@ func _init(_position = Vector3.ZERO, _facing = Vector3.FORWARD) -> void:
     speed = CHASE_SPEED
 
 func think(ball: Ball, target_goal: Goal) -> void:
-    var to_goal := (target_goal.position - ball.position).normalized()
-    var to_ball := ball.position - position
+    var ball_ground := Vector3(ball.position.x, 0, ball.position.z)
+    var to_goal := (target_goal.position - ball_ground).normalized()
+    var to_ball := ball_ground - position
     var is_behind_ball := to_ball.dot(to_goal) > 0
     if not is_behind_ball:
-        _go_to(ball.position - to_goal * BOUNCE_RANGE / 2)
+        _go_to(ball_ground - to_goal * BOUNCE_RANGE / 2)
         return
     if to_ball == Vector3.ZERO:
         return

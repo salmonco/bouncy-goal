@@ -33,3 +33,24 @@ func test_공은_속도가_줄어들다가_멈춘다() -> void:
 
 func test_공은_반지름을_가진다() -> void:
     assert_float(Ball.RADIUS).is_greater(0)
+
+func test_공은_떠_있으면_중력_때문에_점점_빠르게_떨어진다() -> void:
+    var ball := Ball.new()
+    ball.position = Vector3.UP * 1000
+    ball.velocity = Vector3.DOWN * 100
+    ball.move(0.1)
+    assert_float(ball.velocity.y).is_less(-100.0)
+
+func test_공은_땅_아래로_떨어지지_않는다() -> void:
+    var ball := Ball.new()
+    ball.position = Vector3.UP * 10
+    ball.velocity = Vector3.DOWN * 100
+    ball.move(1.0)
+    assert_float(ball.position.y).is_greater_equal(0.0)
+
+func test_공은_떨어지다_땅에_닿으면_위로_튀어오른다() -> void:
+    var ball := Ball.new()
+    ball.position = Vector3.UP * 1
+    ball.velocity = Vector3.DOWN * 100
+    ball.move(0.1)
+    assert_float(ball.velocity.y).is_greater(0.0)

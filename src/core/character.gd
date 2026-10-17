@@ -3,6 +3,7 @@ extends RefCounted
 
 const BOUNCE_RANGE := 50.0
 const POWER := 250.0
+const LIFT := 200.0
 const SPEED := 250.0
 const NO_TEAM := -1
 
@@ -25,7 +26,7 @@ func bounce(ball: Ball) -> bool:
     var to_ball := ball.position - position
     if to_ball.length() > BOUNCE_RANGE or facing.dot(to_ball) <= 0:
         return false
-    ball.velocity = facing * POWER
+    ball.velocity = facing * POWER + Vector3.UP * LIFT
     return true
 
 func world_move_direction() -> Vector3:

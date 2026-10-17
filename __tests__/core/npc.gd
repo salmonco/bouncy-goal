@@ -22,7 +22,14 @@ func test_NPC는_공이_가까우면_찬다() -> void:
     var npc := Npc.new(Vector3.ZERO, Vector3.FORWARD)
     var ball := Ball.new(Vector3.RIGHT * 10)
     npc.think(ball, Goal.new(Vector3.RIGHT * 1000))
-    assert_vector(ball.velocity).is_equal_approx(Vector3.RIGHT * Character.POWER, EPSILON)
+    assert_vector(ball.velocity).is_equal_approx(Vector3.RIGHT * Character.POWER + Vector3.UP * Character.LIFT, EPSILON)
+
+func test_NPC는_공이_떠_있어도_땅에서만_움직인다() -> void:
+    var npc := Npc.new(Vector3.ZERO, Vector3.FORWARD)
+    var ball := Ball.new(Vector3(0, 100, -300))
+    npc.think(ball, Goal.new(Vector3.FORWARD * 1000))
+    npc.move(0.1)
+    assert_float(npc.position.y).is_equal(0.0)
 
 func test_NPC는_공이_멀면_차지_않는다() -> void:
     var npc := Npc.new(Vector3.ZERO, Vector3.FORWARD)
