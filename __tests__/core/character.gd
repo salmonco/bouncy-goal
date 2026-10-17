@@ -229,3 +229,21 @@ func test_캐릭터를_배치하면_그_위치가_시작_위치가_된다() -> v
     character.reset()
     assert_vector(character.position).is_equal(Vector3(0, 0, -300))
     assert_vector(character.facing).is_equal(Vector3.BACK)
+
+func test_캐릭터가_공을_튀기면_튀겼다는_신호를_보낸다() -> void:
+    var character := Character.new()
+    var ball := Ball.new()
+    ball.position = Vector3.FORWARD * 10
+    var emitted := [false]
+    character.bounced.connect(func(): emitted[0] = true)
+    character.bounce(ball)
+    assert_bool(emitted[0]).is_true()
+
+func test_캐릭터가_공을_튀기지_못하면_신호를_보내지_않는다() -> void:
+    var character := Character.new()
+    var ball := Ball.new()
+    ball.position = Vector3.BACK * 10
+    var emitted := [false]
+    character.bounced.connect(func(): emitted[0] = true)
+    character.bounce(ball)
+    assert_bool(emitted[0]).is_false()

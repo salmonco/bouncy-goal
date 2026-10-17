@@ -9,6 +9,8 @@ const MAX_PITCH := deg_to_rad(60)
 const SPEED := 250.0
 const NO_TEAM := -1
 
+signal bounced
+
 var position: Vector3
 var facing: Vector3
 var pitch: float = 0.0
@@ -31,6 +33,7 @@ func bounce(ball: Ball) -> bool:
         return false
     var direction := aim()
     ball.velocity = Vector3(direction.x * POWER, direction.y * LIFT_POWER, direction.z * POWER)
+    bounced.emit()
     return true
 
 func world_move_direction() -> Vector3:
