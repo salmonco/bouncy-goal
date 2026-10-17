@@ -4,8 +4,6 @@ extends Node3D
 
 @onready var _camera: Camera3D = $Camera3D
 @onready var _sun: DirectionalLight3D = $Sun
-@onready var _score_label: RichTextLabel = $HUD/Score
-@onready var _message_label: Label = $HUD/Message
 
 const MOUSE_SENSITIVITY := 0.003
 const EYE_HEIGHT := 40.0
@@ -13,10 +11,6 @@ const EYE_HEIGHT := 40.0
 const KICK_SHAKE := 0.8
 const GOAL_SHAKE := 3.0
 const SHAKE_DECAY := 8.0
-# 골이 들어가면 화면이 서리 빛으로 번쩍였다 사라집니다.
-const FROST_FLASH_COLOR := Color(0.88, 0.95, 1.0)
-const FROST_FLASH_ALPHA := 0.75
-const FROST_FLASH_DURATION := 0.7
 
 var game: Game
 var _player: Character
@@ -24,7 +18,7 @@ var _npc: Npc
 var _sfx: Sfx
 var _kick_view: FirstPersonKickView
 var _shake := 0.0
-var _frost_flash: ColorRect
+var _hud: HudView
 var _last_status: StringName
 
 func _ready() -> void:
@@ -59,13 +53,8 @@ func _ready() -> void:
     _kick_view = FirstPersonKickView.new()
     _camera.add_child(_kick_view)
     _player.bounced.connect(_on_player_kick)
-    _frost_flash = ColorRect.new()
-    _frost_flash.color = Color(FROST_FLASH_COLOR, 0.0)
-    _frost_flash.set_anchors_preset(Control.PRESET_FULL_RECT)
-    _frost_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
-    $HUD.add_child(_frost_flash)
-    # 번쩍임이 글자를 덮지 않도록 HUD 맨 뒤로 보냅니다.
-    $HUD.move_child(_frost_flash, 0)
+    _hud = HudView.new()
+    add_child(_hud)
 
     game.start()
     _last_status = game.status
@@ -93,13 +82,9 @@ func _process(delta: float) -> void:
     _camera.look_at(_camera.position + _player.aim())
     _shake_camera(delta)
     var opponent_team := game.opponent_goal_of(_player.team).team
-    # 1인칭이라 내 몸이 안 보이니, 점수를 각 팀 색으로 칠해 어느 편인지 알려줍니다.
-    _score_label.text = "[center][color=%s]나 %d[/color] : [color=%s]%d 상대[/color]   %s[/center]" % [
-        TeamColors.of(_player.team).to_html(false), game.score_of(_player.team),
-        TeamColors.of(opponent_team).to_html(false), game.score_of(opponent_team),
-        _format_time(game.remaining_time()),
-    ]
-    _message_label.text = _message()
+    _hud.update_score(_player.team, game.score_of(_player.team), opponent_team, game.score_of(opponent_team))
+    _hud.update_time(game.remaining_time())
+    _show_message()
 
 func _on_player_kick() -> void:
     _kick_view.kick()
@@ -108,13 +93,10 @@ func _on_player_kick() -> void:
 func _on_goal() -> void:
     _sfx.play(Sfx.GOAL)
     _sfx.play(Sfx.BLIZZARD, -3.0)
-    _frost_flash.color.a = FROST_FLASH_ALPHA
-    create_tween().tween_property(_frost_flash, "color:a", 0.0, FROST_FLASH_DURATION).set_ease(Tween.EASE_OUT)
     _shake = maxf(_shake, GOAL_SHAKE)
-    # "GOAL!" 글자가 크게 튀어나왔다가 제자리로 돌아옵니다.
-    _message_label.pivot_offset = _message_label.size / 2
-    _message_label.scale = Vector2.ONE * 1.8
-    create_tween().tween_property(_message_label, "scale", Vector2.ONE, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+    # 큰 글자가 튀어나오려면 글자가 먼저 들어가 있어야 합니다.
+    _show_message()
+    _hud.celebrate_goal()
 
 # 카메라 위치는 그대로 두고 화면만 어긋나게(h_offset, v_offset) 흔듭니다.
 func _shake_camera(delta: float) -> void:
@@ -122,13 +104,14 @@ func _shake_camera(delta: float) -> void:
     _camera.h_offset = randf_range(-1, 1) * _shake
     _camera.v_offset = randf_range(-1, 1) * _shake
 
-func _message() -> String:
+func _show_message() -> void:
     match game.status:
         GameStatus.GOAL:
-            return "GOAL!"
+            _hud.show_message("GOAL!")
         GameStatus.OVER:
-            return "%s\nR 키로 다시 시작" % _result()
-    return ""
+            _hud.show_message(_result(), "R 키로 다시 시작")
+        _:
+            _hud.show_message("")
 
 func _result() -> String:
     var winner := game.winner()
@@ -137,9 +120,3 @@ func _result() -> String:
     if winner == _player.team:
         return "WIN"
     return "LOSE"
-
-func _format_time(seconds: float) -> String:
-    # 종료 직전 마지막 tick 에서 살짝 음수가 될 수 있어 0 에서 멈춥니다.
-    var total := ceili(maxf(seconds, 0.0))
-    @warning_ignore("integer_division")
-    return "%02d:%02d" % [total / 60, total % 60]
