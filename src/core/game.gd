@@ -57,7 +57,7 @@ func tick(delta: float) -> void:
         ball.velocity.z = -ball.velocity.z
     ball.position = confined
 
-# 경기장 벽과 골망 벽 안으로 위치를 되돌립니다. 골대 입구로는 골망 안까지 들어갈 수 있습니다.
+# 경기장 벽과 골망 벽 안으로 위치를 되돌립니다. 골대 입구(크로스바 아래)로는 골망 안까지 들어갈 수 있습니다.
 # from 은 이동 전 위치로, 이미 골망 안에 있었는지 판단하는 데 씁니다.
 # radius 만큼 크기가 있으면 가장자리가 벽에 닿는 곳에서 멈춥니다.
 func _confine(position: Vector3, from: Vector3, radius: float) -> Vector3:
@@ -65,7 +65,8 @@ func _confine(position: Vector3, from: Vector3, radius: float) -> Vector3:
     var half_width := (Goal.WIDTH / 2 if was_past_goal_line else FIELD_WIDTH / 2) - radius
     var x := clampf(position.x, -half_width, half_width)
     var is_within_goal_width := absf(x) <= Goal.WIDTH / 2 - radius
-    var half_length := (FIELD_LENGTH / 2 + Goal.DEPTH if is_within_goal_width else FIELD_LENGTH / 2) - radius
+    var can_enter_goal := is_within_goal_width and (was_past_goal_line or _is_under_crossbar(position.y, radius))
+    var half_length := (FIELD_LENGTH / 2 + Goal.DEPTH if can_enter_goal else FIELD_LENGTH / 2) - radius
     var z := clampf(position.z, -half_length, half_length)
     return Vector3(x, position.y, z)
 
@@ -116,12 +117,20 @@ func is_goal() -> bool:
     return _is_forward_goal() or _is_back_goal()
 
 func _is_forward_goal() -> bool:
-    var to_forward_goal := _forward_goal.position - ball.position
-    return ball.position.distance_to(_forward_goal.position) < Goal.WIDTH / 2 and not Vector3.FORWARD.dot(to_forward_goal) > 0
+    return _is_in_goal(_forward_goal, Vector3.FORWARD)
 
 func _is_back_goal() -> bool:
-    var to_back_goal := _back_goal.position - ball.position
-    return ball.position.distance_to(_back_goal.position) < Goal.WIDTH / 2 and not Vector3.BACK.dot(to_back_goal) > 0
+    return _is_in_goal(_back_goal, Vector3.BACK)
+
+func _is_in_goal(goal: Goal, outward: Vector3) -> bool:
+    var ball_ground := Vector3(ball.position.x, 0, ball.position.z)
+    var to_goal := goal.position - ball_ground
+    return ball_ground.distance_to(goal.position) < Goal.WIDTH / 2 \
+        and not outward.dot(to_goal) > 0 \
+        and _is_under_crossbar(ball.position.y, Ball.RADIUS)
+
+func _is_under_crossbar(y: float, radius: float) -> bool:
+    return y + radius * 2 <= Goal.HEIGHT
 
 func remaining_time() -> float:
     return DURATION - _elapsed_time

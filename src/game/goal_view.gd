@@ -1,7 +1,7 @@
 class_name GoalView
 extends Node3D
 
-const POST_HEIGHT := 60.0
+const POST_HEIGHT := Goal.HEIGHT
 const POST_THICKNESS := 5.0
 
 var goal: Goal

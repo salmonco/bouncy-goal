@@ -537,3 +537,35 @@ func test_캐릭터는_골망_옆으로_나가지_않는다() -> void:
     game.tick(0.1)
     assert_float(player.position.x).is_equal(Goal.WIDTH / 2)
     assert_float(player.position.z).is_less(-Game.FIELD_LENGTH / 2)
+
+func test_공이_크로스바_아래라면_떠_있어도_골이다() -> void:
+    var game := Game.new()
+    var forward_goal := game.goals[0]
+    game.ball.position = forward_goal.position + Vector3.FORWARD * 10 + Vector3.UP * (Goal.HEIGHT - Ball.RADIUS * 2)
+    assert_bool(game.is_goal()).is_true()
+
+func test_공이_크로스바에_걸치거나_그보다_높으면_골이_아니다() -> void:
+    var game := Game.new()
+    var forward_goal := game.goals[0]
+    game.ball.position = forward_goal.position + Vector3.FORWARD * 10 + Vector3.UP * (Goal.HEIGHT - Ball.RADIUS)
+    assert_bool(game.is_goal()).is_false()
+    game.ball.position = forward_goal.position + Vector3.FORWARD * 10 + Vector3.UP * (Goal.HEIGHT + 10)
+    assert_bool(game.is_goal()).is_false()
+
+func test_공이_크로스바_위로_날아오면_골망에_들어가지_않고_앞_벽에_튕긴다() -> void:
+    var game := Game.new()
+    game.start()
+    game.ball.position = Vector3(0, Goal.HEIGHT + 50, -(Game.FIELD_LENGTH / 2 - Ball.RADIUS - 1))
+    game.ball.velocity = Vector3.FORWARD * 100
+    game.tick(0.1)
+    assert_float(game.ball.velocity.z).is_greater(0)
+    assert_float(game.ball.position.z).is_greater_equal(-(Game.FIELD_LENGTH / 2 - Ball.RADIUS))
+
+func test_공이_크로스바_위로_날아오면_뒤_벽에도_튕긴다() -> void:
+    var game := Game.new()
+    game.start()
+    game.ball.position = Vector3(0, Goal.HEIGHT + 50, Game.FIELD_LENGTH / 2 - Ball.RADIUS - 1)
+    game.ball.velocity = Vector3.BACK * 100
+    game.tick(0.1)
+    assert_float(game.ball.velocity.z).is_less(0)
+    assert_float(game.ball.position.z).is_less_equal(Game.FIELD_LENGTH / 2 - Ball.RADIUS)
