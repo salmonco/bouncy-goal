@@ -3,13 +3,15 @@ shader_type spatial;
 render_mode ambient_light_disabled;
 
 // 캐릭터용 툰 셰이더입니다. 빛 받는 면과 그림자 면을 두 단계로 딱 나눠, 그림처럼 평평한 색으로 칠합니다.
-// 빛 받는 면은 albedo 그대로, 그림자 면은 albedo * shade 입니다. 빛의 세기와 색은 따르지 않습니다.
+// 빛 받는 면은 albedo 그대로, 그림자 면은 albedo * shade * shade_color 입니다. 빛의 세기와 색은 따르지 않습니다.
 // draw_face 를 켜면 얼굴(Face 메시) 앞면에 눈·하이라이트·입·볼터치를 그립니다.
 // 얼굴 좌표는 Face 메시의 원점(머리 중심) 기준이고, 앞은 -Z 입니다. tools/blender/character.py 의 머리 크기와 맞춥니다.
 
 uniform vec3 albedo : source_color = vec3(1.0);
 // 그림자 면은 원래 색의 이 비율만큼만 밝습니다.
 uniform float shade = 0.72;
+// 그림자 면에 곱하는 색입니다. 눈처럼 흰 것은 푸르스름하게 주면 회색보다 자연스럽습니다.
+uniform vec3 shade_color : source_color = vec3(1.0);
 // 빛과 면이 이루는 각도(dot)가 이보다 크면 빛 받는 면입니다.
 uniform float shade_threshold = 0.05;
 
@@ -62,5 +64,5 @@ void fragment() {
 
 void light() {
 	float lit = smoothstep(shade_threshold - 0.02, shade_threshold + 0.02, dot(NORMAL, LIGHT)) * ATTENUATION;
-	DIFFUSE_LIGHT += vec3(mix(shade, 1.0, lit));
+	DIFFUSE_LIGHT += mix(shade * shade_color, vec3(1.0), lit);
 }

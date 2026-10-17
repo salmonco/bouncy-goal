@@ -26,7 +26,7 @@ const CRYSTAL_COLOR := Color(0.62, 0.86, 1.0, 0.75)
 const ROCK_COLOR := Color(0.62, 0.66, 0.78)
 const SPRING_COLOR := Color(0.55, 0.90, 0.95)
 const STEAM_COLOR := Color(1.0, 1.0, 1.0, 0.45)
-const CLOUD_COLOR := Color(1.0, 1.0, 1.0, 0.92)
+const CLOUD_COLOR := Color(1.0, 1.0, 1.0)
 
 # 경기장 위로 내리는 눈송이입니다.
 const SNOWFALL_AMOUNT := 900
@@ -59,7 +59,6 @@ func _ready() -> void:
         _place_on_surface(_hot_spring())
     for i in CLOUD_COUNT:
         _add_cloud()
-    _add_far_planets()
     _add_snowfall()
 
 # 꼭대기에서 PROP_MIN_ANGLE ~ PROP_MAX_ANGLE 사이 아무 곳에, 행성 표면에 수직으로 세웁니다.
@@ -192,27 +191,6 @@ func _add_cloud() -> void:
     cloud.position = Vector3(cos(around), 0, sin(around)) * _rng.randf_range(1300, 2200) + Vector3.UP * _rng.randf_range(450, 800)
     cloud.rotation.y = _rng.randf_range(0, TAU)
     add_child(cloud)
-
-# 하늘에 멀리 떠 있는 작은 행성들입니다. 하나에는 고리를 둘러 우주 느낌을 냅니다.
-func _add_far_planets() -> void:
-    for spec in [
-        [Vector3(-3200, 1400, -3000), 260.0, Color(1.0, 0.78, 0.82), true],
-        [Vector3(3400, 1900, 1200), 170.0, Color(0.78, 0.74, 1.0), false],
-        [Vector3(1200, 2400, -3800), 110.0, Color(0.70, 0.92, 0.98), false],
-    ]:
-        var far_planet := _sphere(spec[1], spec[2])
-        far_planet.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-        far_planet.position = spec[0]
-        add_child(far_planet)
-        if spec[3]:
-            var ring_mesh := TorusMesh.new()
-            ring_mesh.inner_radius = spec[1] * 1.35
-            ring_mesh.outer_radius = spec[1] * 1.75
-            var ring := Shapes.mesh(ring_mesh, Color(1.0, 0.95, 0.85, 0.85))
-            ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-            ring.scale = Vector3(1, 0.08, 1)
-            ring.rotation = Vector3(deg_to_rad(20), 0, deg_to_rad(-15))
-            far_planet.add_child(ring)
 
 # 경기장 위 넓은 상자에서 눈송이가 천천히 흩날리며 내립니다.
 func _add_snowfall() -> void:

@@ -9,8 +9,6 @@ extends Node3D
 # 몸통은 뒤로 젖혀집니다. 걷기는 실제로 움직인 거리를 따르므로, 나중에 네트워크로 위치만 받아도 그대로 걷습니다.
 
 const MODEL: PackedScene = preload("res://assets/models/character.glb")
-const TOON_SHADER := preload("res://assets/materials/toon.gdshader")
-const OUTLINE_SHADER := preload("res://assets/materials/outline.gdshader")
 const TEAM_MATERIAL_NAME := "Team"
 const HEAD_NODE_NAME := "Head"
 const FACE_NODE_NAME := "Face"
@@ -41,7 +39,6 @@ var character: Character
 # 팀은 game.start() 때마다 다시 정해지므로, 바뀌면 다시 칠합니다.
 var _painted_team: int = Character.NO_TEAM
 var _team_material: ShaderMaterial
-var _outline_material: ShaderMaterial
 var _range_material: StandardMaterial3D
 var _head: Node3D
 var _torso: Node3D
@@ -69,8 +66,6 @@ func _ready() -> void:
         _legs.append(model.find_child("Leg" + side, true, false))
     _last_position = character.position
     character.bounced.connect(func(): _kick_time = 0.0)
-    _outline_material = ShaderMaterial.new()
-    _outline_material.shader = OUTLINE_SHADER
     for mesh_instance in model.find_children("*", "MeshInstance3D", true, false):
         _apply_toon(mesh_instance)
 
@@ -149,11 +144,8 @@ func _apply_toon(mesh_instance: MeshInstance3D) -> void:
         if is_team and _team_material:
             mesh_instance.set_surface_override_material(surface, _team_material)
             continue
-        var toon := ShaderMaterial.new()
-        toon.shader = TOON_SHADER
-        toon.set_shader_parameter("albedo", original.albedo_color)
+        var toon := Shapes.toon_material(original.albedo_color)
         toon.set_shader_parameter("draw_face", mesh_instance.name == FACE_NODE_NAME)
-        toon.next_pass = _outline_material
         mesh_instance.set_surface_override_material(surface, toon)
         if is_team:
             _team_material = toon
