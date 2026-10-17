@@ -8,7 +8,11 @@
 #
 # Godot 에서 쓰는 약속:
 #   - 재질 "Team" 은 목도리입니다. CharacterView 가 팀 색으로 바꿔 칠합니다.
-#   - 오브젝트 "Head" 는 목을 원점으로 하는 머리입니다. 고개 각도(pitch)만큼 X 축으로 돌립니다.
+#   - 움직이는 마디는 관절을 원점으로 하는 빈 오브젝트입니다. CharacterView 가 X 축으로 돌려 걷기·공 차기 동작을 만듭니다.
+#       Torso : 엉덩이. 몸통·팔·머리를 담습니다. 걸을 때 들썩이고 공 찰 때 젖힙니다.
+#       Head  : 목. 고개 각도(pitch)만큼 끄덕입니다.
+#       ArmL, ArmR : 어깨.   LegL, LegR : 엉덩이 관절. (L/R 은 캐릭터 기준 왼쪽/오른쪽)
+#     Godot 는 노드 이름의 '.' 을 바꿔 버리므로 마디 이름에는 쓰지 않습니다.
 #   - 얼굴은 Blender 의 +Y 를 봅니다. glTF 로 나가면 Godot 의 앞(-Z)이 됩니다.
 #   - 오브젝트 "Face" 는 머리 중심을 원점으로 하는 피부입니다. 눈·입·볼터치는 모델에 없고,
 #     툰 셰이더(assets/materials/toon.gdshader)가 이 원점 기준 좌표로 얼굴 위에 그립니다.
@@ -54,6 +58,19 @@ def finish(obj, mat, parent=None):
         poly.use_smooth = True
     if parent:
         # 방금 바꾼 위치·회전이 matrix_world 에 반영되도록 먼저 갱신합니다.
+        bpy.context.view_layer.update()
+        world = obj.matrix_world.copy()
+        obj.parent = parent
+        obj.matrix_world = world
+    return obj
+
+
+def pivot(name, location, parent=None):
+    """관절 자리에 두는 빈 오브젝트입니다. 이걸 돌리면 딸린 부품이 관절을 축으로 함께 돕니다."""
+    bpy.ops.object.empty_add(location=location)
+    obj = bpy.context.active_object
+    obj.name = name
+    if parent:
         bpy.context.view_layer.update()
         world = obj.matrix_world.copy()
         obj.parent = parent
@@ -148,22 +165,32 @@ def on_head(angle_deg, z, outward=0.0):
 
 
 # --- 몸 ---------------------------------------------------------------------
-shirt = rounded_box("Shirt", (0, 0, 19.5), (13.0, 8.0, 11.0), 2.6, SHIRT)
+HIP_HEIGHT = 13.0
+SHOULDER_HEIGHT = 22.5
+torso = pivot("Torso", (0, 0, HIP_HEIGHT))
+shirt = rounded_box("Shirt", (0, 0, 19.5), (13.0, 8.0, 11.0), 2.6, SHIRT, torso)
 # 카라: 목 앞에서 양옆으로 접힌 두 장입니다.
 for side in (-1, 1):
     rounded_box(f"Collar.{side}", (side * 1.9, 3.9, 23.6), (3.4, 0.9, 2.4), 0.4, SHIRT, shirt,
         rotation=(math.radians(-20), 0, math.radians(side * -25)))
-# 팔: 짧은 소매 아래로 가는 맨팔이 곧게 내려옵니다.
-for side in (-1, 1):
-    capsule(f"Sleeve.{side}", (side * 6.2, 0, 23.0), (side * 7.6, 0, 19.0), 2.4, SHIRT, shirt)
-    capsule(f"Arm.{side}", (side * 7.7, 0, 19.0), (side * 8.0, 0.3, 13.6), 1.5, SKIN, shirt)
-    blob(f"Hand.{side}", (side * 8.0, 0.3, 12.6), (1.8, 1.8, 1.9), SKIN, shirt, segments=16)
+# 팔: 짧은 소매 아래로 가는 맨팔이 곧게 내려옵니다. side 가 +1 이면 +X, 캐릭터 기준 오른쪽입니다.
+def side_name(side):
+    return "R" if side > 0 else "L"
 
-hips = rounded_box("Hips", (0, 0, 13.6), (9.6, 7.0, 3.4), 1.4, JEANS, shirt)
+
 for side in (-1, 1):
-    capsule(f"Leg.{side}", (side * 2.4, 0, 13.0), (side * 2.4, 0, 3.8), 2.3, JEANS, shirt)
+    arm = pivot(f"Arm{side_name(side)}", (side * 6.6, 0, SHOULDER_HEIGHT), shirt)
+    capsule(f"Sleeve.{side}", (side * 6.2, 0, 23.0), (side * 7.6, 0, 19.0), 2.4, SHIRT, arm)
+    capsule(f"Forearm.{side}", (side * 7.7, 0, 19.0), (side * 8.0, 0.3, 13.6), 1.5, SKIN, arm)
+    blob(f"Hand.{side}", (side * 8.0, 0.3, 12.6), (1.8, 1.8, 1.9), SKIN, arm, segments=16)
+
+rounded_box("Hips", (0, 0, 13.6), (9.6, 7.0, 3.4), 1.4, JEANS, torso)
+# 다리는 몸통이 들썩여도 땅에 붙어 있도록 Torso 밖에 둡니다.
+for side in (-1, 1):
+    leg = pivot(f"Leg{side_name(side)}", (side * 2.4, 0, HIP_HEIGHT))
+    capsule(f"Shin.{side}", (side * 2.4, 0, 13.0), (side * 2.4, 0, 3.8), 2.3, JEANS, leg)
     # 고양이 얼굴 슬리퍼: 둥근 신발 위에 귀 두 개, 앞에 점 눈 두 개.
-    slipper = blob(f"Slipper.{side}", (side * 2.8, 1.0, 1.8), (2.9, 4.2, 1.9), SLIPPER, shirt, segments=24)
+    slipper = blob(f"Slipper.{side}", (side * 2.8, 1.0, 1.8), (2.9, 4.2, 1.9), SLIPPER, leg, segments=24)
     for ear in (-1, 1):
         spike(f"SlipperEar.{side}.{ear}", (side * 2.8 + ear * 1.3, 2.4, 3.0), (side * 2.8 + ear * 1.4, 2.4, 4.9), 0.75, SLIPPER, slipper)
         blob(f"SlipperEye.{side}.{ear}", (side * 2.8 + ear * 1.0, 4.9, 2.4), (0.35, 0.2, 0.35), INK, slipper, segments=10)
@@ -173,12 +200,7 @@ ring("Scarf", (0, 0, NECK_HEIGHT + 0.6), 5.0, 1.9, TEAM, shirt)
 capsule("ScarfTail", (2.6, 4.4, 24.6), (3.2, 5.0, 19.6), 1.5, TEAM, shirt)
 
 # --- 머리 (목을 원점으로) -----------------------------------------------------
-bpy.ops.object.empty_add(location=(0, 0, NECK_HEIGHT))
-head = bpy.context.active_object
-head.name = "Head"
-head.parent = shirt
-bpy.context.view_layer.update()
-head.matrix_world.translation = (0, 0, NECK_HEIGHT)
+head = pivot("Head", (0, 0, NECK_HEIGHT), shirt)
 
 blob("Face", HEAD_CENTER, HEAD_RADII, SKIN, head)
 
