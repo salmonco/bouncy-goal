@@ -1,8 +1,8 @@
 class_name Goal
 extends RefCounted
 
-const WIDTH := 100.0
-const DEPTH := 40.0
+const WIDTH := 250.0
+const DEPTH := 70.0
 const HEIGHT := 150.0
 
 var position: Vector3
