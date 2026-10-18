@@ -25,8 +25,10 @@ func _create_peer() -> void:
     var peer := ENetMultiplayerPeer.new()
     peer.create_server(PORT, MAX_CLIENTS)
     multiplayer.multiplayer_peer = peer
+    print("server listen on %d" % PORT)
 
 func on_peer_connected(id: int) -> void:
+    print("피어 접속: %d" % id)
     var character := Character.new(Vector3.ZERO, Vector3.FORWARD, id)
     characters.append(character)
     waitings.append(character)
