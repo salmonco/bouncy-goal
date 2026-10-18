@@ -32,7 +32,8 @@ const NET_WOBBLE_DECAY := 2.5
 # 눈보라가 일어나는 곳의 골라인에서 경기장 쪽으로의 거리입니다.
 const BLIZZARD_DISTANCE := 40.0
 
-var goal: Goal
+var _team: int
+var _snapshot: Dictionary
 
 # 그물 판과 평소 처짐입니다. 출렁일 때 평소 처짐에 흔들림을 더합니다.
 var _net_panels: Array[MeshInstance3D] = []
@@ -41,13 +42,17 @@ var _scored_score := 0
 # 골이 들어간 뒤 지난 시간입니다. 음수면 출렁이지 않습니다.
 var _wobble_time := -1.0
 
-func _init(_goal: Goal) -> void:
-    goal = _goal
+func _init(_position: Vector3, team: int) -> void:
+    position = _position
+    _team = team
+
+func render(snapshot: Dictionary) -> void:
+    _snapshot = snapshot
 
 func _ready() -> void:
     var half_width := Goal.WIDTH / 2
     # 골대 바깥쪽(경기장 밖) 방향. 그물은 이쪽으로 뻗습니다.
-    var outward := signf(goal.position.z)
+    var outward := signf(position.z)
 
     for x in [-half_width, half_width]:
         var post := Shapes.box(Vector3(POST_THICKNESS, POST_HEIGHT, POST_THICKNESS), POST_COLOR)
@@ -61,7 +66,7 @@ func _ready() -> void:
 
     var net := ShaderMaterial.new()
     net.shader = NET_SHADER
-    net.set_shader_parameter("color", NET_COLOR.lerp(TeamColors.of(goal.team), NET_TEAM_TINT))
+    net.set_shader_parameter("color", NET_COLOR.lerp(TeamColors.of(_team), NET_TEAM_TINT))
     # 뒤 판은 바깥으로, 옆 판은 각자 옆으로 부풀고, 위 판은 아래로 처집니다.
     _add_net(net, Vector2(Goal.WIDTH, POST_HEIGHT), PlaneMesh.FACE_Z, Vector3(0, POST_HEIGHT / 2, outward * Goal.DEPTH), outward * NET_SAG)
     for side in [-1, 1]:
@@ -110,18 +115,16 @@ func _add_snow_and_icicles() -> void:
         add_child(icicle)
 
 func _process(delta: float) -> void:
-    position = goal.position
-    # 점수는 새 경기에서 0 으로 돌아가므로, 오를 때만 골로 칩니다.
-    if goal.score > _scored_score:
+    if _snapshot.score > _scored_score:
         _celebrate()
-    _scored_score = goal.score
+    _scored_score = _snapshot.score
     _wobble(delta)
 
 func _celebrate() -> void:
     _wobble_time = 0.0
     # 골대 입구 바로 앞(경기장 쪽) 바닥에서 눈보라가 일어납니다.
     var blizzard := BlizzardEffect.new()
-    blizzard.position = Vector3(0, 0, -signf(goal.position.z) * BLIZZARD_DISTANCE)
+    blizzard.position = Vector3(0, 0, -signf(position.z) * BLIZZARD_DISTANCE)
     add_child(blizzard)
 
 func _wobble(delta: float) -> void:
