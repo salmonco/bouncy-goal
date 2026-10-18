@@ -36,9 +36,13 @@ func on_peer_connected(id: int) -> void:
 func on_peer_disconnected(id: int) -> void:
     var game := game_of(id)
     var player := character_of(id)
-    if game.characters.size() == 2:
-        games.erase(game)
-    else:
+    if game != null:
+        if game.characters.size() == 2:
+            games.erase(game)
+            for character in game.characters:
+                if character != player:
+                    waitings.append(character)
+                    opponent_left.rpc_id(character.peer_id)
         game.characters.erase(player)
     characters.erase(player)
     waitings.erase(player)
@@ -94,6 +98,10 @@ func screen_changed(_snapshot: Dictionary) -> void:
 
 @rpc("authority", "call_remote", "reliable")
 func kicked(_peer_id: int) -> void:
+    pass
+
+@rpc("authority", "call_remote", "reliable")
+func opponent_left() -> void:
     pass
 
 func character_of(peer_id: int) -> Character:

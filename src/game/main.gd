@@ -117,6 +117,20 @@ func kicked(kicker_peer_id: int) -> void:
     if kicker_peer_id == peer_id:
         _on_player_kick()
 
+@rpc("authority", "call_remote", "reliable")
+func opponent_left() -> void:
+    Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+    for goal_view in _goal_views:
+        goal_view.queue_free()
+    _goal_views.clear()
+    for character_view in _character_views.values():
+        character_view.queue_free()
+    _character_views.clear()
+    _ball_view.queue_free()
+    _ball_view = null
+    _sfx.queue_free()
+    _hud_view.show_message("상대가 나갔습니다")
+
 func _unhandled_input(event: InputEvent) -> void:
     if event.is_action_pressed("ui_cancel"):
         Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
