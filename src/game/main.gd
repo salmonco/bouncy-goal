@@ -120,6 +120,8 @@ func kicked(kicker_peer_id: int) -> void:
 func _unhandled_input(event: InputEvent) -> void:
     if event.is_action_pressed("ui_cancel"):
         Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+    if not _is_connected():
+        return
     if event is InputEventMouseMotion:
         request_turn.rpc_id(1, -event.relative.x * MOUSE_SENSITIVITY)
         request_tilt.rpc_id(1, -event.relative.y * MOUSE_SENSITIVITY)
@@ -129,11 +131,14 @@ func _unhandled_input(event: InputEvent) -> void:
         request_game_restart.rpc_id(1)
 
 func _process(delta: float) -> void:
-    if peer_id == 0:
+    if not _is_connected():
         return
     var input_vector := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
     request_move_input.rpc_id(1, input_vector)
     _shake_camera(delta)
+
+func _is_connected() -> bool:
+    return multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED
 
 func _on_player_kick() -> void:
     _first_person_kick_view.kick()
