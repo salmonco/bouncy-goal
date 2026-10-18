@@ -30,3 +30,9 @@ func move(delta: float) -> void:
 func reset() -> void:
     position = POSITION
     velocity = Vector3.ZERO
+
+func snapshot() -> Dictionary:
+    return {
+        "position": position,
+        "velocity": velocity
+    }
