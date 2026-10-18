@@ -38,6 +38,7 @@ func _create_peer() -> void:
 
 func on_connected_to_server() -> void:
     peer_id = multiplayer.get_unique_id()
+    _show_waiting("상대를 기다리는 중")
     request_game_start.rpc_id(1)
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -72,6 +73,7 @@ func game_started(snapshot: Dictionary) -> void:
     _field_view.visible = true
     _field_walls_view.visible = true
     _hud_view.visible = true
+    _hud_view.show_scoreboard(true)
     for goal in snapshot["goals"]:
         var goal_view := GoalView.new(goal.position, goal.team)
         goal_view.render(goal)
@@ -129,7 +131,12 @@ func opponent_left() -> void:
     _ball_view.queue_free()
     _ball_view = null
     _sfx.queue_free()
-    _hud_view.show_message("상대가 나갔습니다")
+    _show_waiting("상대가 나갔습니다. 새 상대를 기다리는 중")
+
+func _show_waiting(subtitle: String) -> void:
+    _hud_view.visible = true
+    _hud_view.show_scoreboard(false)
+    _hud_view.show_message("WAITING", subtitle)
 
 func _unhandled_input(event: InputEvent) -> void:
     if event.is_action_pressed("ui_cancel"):

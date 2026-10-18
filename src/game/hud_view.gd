@@ -34,6 +34,7 @@ const TITLE_POP_SCALE := 1.8
 const TITLE_POP_DURATION := 0.45
 
 var _frost_flash: ColorRect
+var _scoreboard: PanelContainer
 var _my_name: Label
 var _my_score: Label
 var _opponent_name: Label
@@ -83,6 +84,10 @@ func show_message(title: String, subtitle := "") -> void:
     _subtitle.text = subtitle
     _subtitle_panel.visible = subtitle != ""
 
+# 경기 전(대기 중)에는 점수 막대를 숨깁니다.
+func show_scoreboard(shown: bool) -> void:
+    _scoreboard.visible = shown
+
 func celebrate_goal() -> void:
     _frost_flash.color.a = FROST_FLASH_ALPHA
     create_tween().tween_property(_frost_flash, "color:a", 0.0, FROST_FLASH_DURATION).set_ease(Tween.EASE_OUT)
@@ -112,6 +117,7 @@ func _build_scoreboard() -> void:
     bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
     bar.position.y = 14
     add_child(bar)
+    _scoreboard = bar
 
 func _build_message() -> void:
     var center := VBoxContainer.new()
