@@ -1,122 +1,161 @@
 extends Node3D
 
-# 코어(Game)를 매 프레임 진행시키고, 그 상태를 화면에 그립니다.
-
 @onready var _camera: Camera3D = $Camera3D
 @onready var _sun: DirectionalLight3D = $Sun
+@onready var _planet_view: PlanetView = $PlanetView
+@onready var _field_view: FieldView = $FieldView
+@onready var _field_walls_view: FieldWallsView = $FieldWallsView
+@onready var _hud_view: HudView = $HudView
+@onready var _first_person_kick_view: FirstPersonKickView = $Camera3D/FirstPersonKickView
+
+const ADDRESS := "localhost"
 
 const MOUSE_SENSITIVITY := 0.003
 const EYE_HEIGHT := 40.0
-# 손맛: 공을 찰 때와 골이 들어갈 때 화면을 흔듭니다. 흔들림은 SHAKE_DECAY 로 빠르게 잦아듭니다.
+
 const KICK_SHAKE := 0.8
 const GOAL_SHAKE := 3.0
 const SHAKE_DECAY := 8.0
 
-var game: Game
-var _player: Character
-var _npc: Npc
+var peer_id: int
+
+var _goal_views: Array[GoalView] = []
+var _ball_view: BallView
+var _character_views: Dictionary[int, CharacterView] = {}
+
 var _sfx: Sfx
-var _kick_view: FirstPersonKickView
 var _shake := 0.0
-var _hud: HudView
 var _last_status: StringName
 
 func _ready() -> void:
+    _create_peer()
+    multiplayer.connected_to_server.connect(on_connected_to_server)
+
+func _create_peer() -> void:
+    var peer := ENetMultiplayerPeer.new()
+    peer.create_client(ADDRESS, Server.PORT)
+    multiplayer.multiplayer_peer = peer
+
+func on_connected_to_server() -> void:
+    peer_id = multiplayer.get_unique_id()
+    request_game_start.rpc_id(1)
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_game_start() -> void:
+    pass
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_game_restart() -> void:
+    pass
+
+@rpc("any_peer", "call_remote", "unreliable")
+func request_move_input(_input_vector: Vector2) -> void:
+    pass
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_turn(_angle: float) -> void:
+    pass
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_tilt(_angle: float) -> void:
+    pass
+
+@rpc("any_peer", "call_remote", "reliable")
+func request_bounce() -> void:
+    pass
+
+@rpc("authority", "call_remote", "reliable")
+func game_started(snapshot: Dictionary) -> void:
     Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-
     _sun.rotation_degrees = Vector3(-55, 30, 0)
-
-    # 시작 위치는 game.start() 에서 팀이 정해질 때 배치됩니다.
-    _player = Character.new()
-    _npc = Npc.new()
-    var characters: Array[Character] = [_player, _npc]
-    game = Game.new(characters)
-
-    add_child(PlanetView.new())
-    add_child(FieldView.new())
-    add_child(FieldWallsView.new())
-    for goal in game.goals:
-        add_child(GoalView.new(goal))
-    # 1인칭이라 내 캐릭터는 카메라를 가리지 않게 숨깁니다.
-    var player_view := CharacterView.new(_player)
-    player_view.visible = false
-    add_child(player_view)
-    add_child(CharacterView.new(_npc))
-    var ball_view := BallView.new(game.ball)
-    add_child(ball_view)
-
+    _planet_view.visible = true
+    _field_view.visible = true
+    _field_walls_view.visible = true
+    _hud_view.visible = true
+    for goal in snapshot["goals"]:
+        var goal_view := GoalView.new(goal.position, goal.team)
+        goal_view.render(goal)
+        add_child(goal_view)
+        _goal_views.append(goal_view)
+    for character in snapshot["characters"]:
+        var character_view := CharacterView.new()
+        character_view.render(character)
+        # 1인칭이라 내 캐릭터는 카메라를 가리지 않게 숨깁니다.
+        character_view.visible = character.peer_id != peer_id
+        add_child(character_view)
+        _character_views[character.peer_id] = character_view
+    _ball_view = BallView.new()
+    _ball_view.render(snapshot["ball"])
+    add_child(_ball_view)
     _sfx = Sfx.new()
     add_child(_sfx)
-    for character in characters:
-        character.bounced.connect(func(): _sfx.play_at(Sfx.KICK, game.ball.position + Vector3.UP * Ball.RADIUS))
-    ball_view.landed.connect(func(at: Vector3): _sfx.play_at(Sfx.GROUND, at, -2.0))
-    _kick_view = FirstPersonKickView.new()
-    _camera.add_child(_kick_view)
-    _player.bounced.connect(_on_player_kick)
-    _hud = HudView.new()
-    add_child(_hud)
+    _ball_view.landed.connect(func(at: Vector3): _sfx.play_at(Sfx.GROUND, at, -2.0))
+    _last_status = snapshot["status"]
 
-    game.start()
-    _last_status = game.status
+@rpc("authority", "call_remote", "unreliable_ordered")
+func screen_changed(snapshot: Dictionary) -> void:
+    if _ball_view == null:
+        return
+    if snapshot["status"] != _last_status and snapshot["status"] == GameStatus.GOAL:
+        _on_goal(snapshot["status"], snapshot["result"])
+    _camera.position = snapshot["player"].position + Vector3.UP * EYE_HEIGHT
+    _camera.look_at(_camera.position + snapshot["player"].aim)
+    _hud_view.update_score(snapshot["player"].team, snapshot["score"], snapshot["opponent_team"], snapshot["opponent_score"])
+    _hud_view.update_time(snapshot["remaining_time"])
+    _show_message(snapshot["status"], snapshot["result"])
+    for i in _goal_views.size():
+        _goal_views[i].render(snapshot["goals"][i])
+    _ball_view.render(snapshot["ball"])
+    for character in snapshot["characters"]:
+        _character_views[character.peer_id].render(character)
+    _last_status = snapshot["status"]
+
+@rpc("authority", "call_remote", "reliable")
+func kicked(kicker_peer_id: int) -> void:
+    _character_views[kicker_peer_id].kick()
+    _sfx.play_at(Sfx.KICK, _ball_view.position + Vector3.UP * Ball.RADIUS)
+    if kicker_peer_id == peer_id:
+        _on_player_kick()
 
 func _unhandled_input(event: InputEvent) -> void:
     if event.is_action_pressed("ui_cancel"):
         Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
     if event is InputEventMouseMotion:
-        _player.turn(-event.relative.x * MOUSE_SENSITIVITY)
-        _player.tilt(-event.relative.y * MOUSE_SENSITIVITY)
+        request_turn.rpc_id(1, -event.relative.x * MOUSE_SENSITIVITY)
+        request_tilt.rpc_id(1, -event.relative.y * MOUSE_SENSITIVITY)
     if event.is_action_pressed("bounce"):
-        _player.bounce(game.ball)
-    if event.is_action_pressed("restart") and game.status == GameStatus.OVER:
-        game.start()
+        request_bounce.rpc_id(1)
+    if event.is_action_pressed("restart"):
+        request_game_restart.rpc_id(1)
 
 func _process(delta: float) -> void:
+    if peer_id == 0:
+        return
     var input_vector := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-    _player.move_input = Vector3(input_vector.x, 0, input_vector.y)
-    _npc.think(game.ball, game.opponent_goal_of(_npc.team))
-    game.tick(delta)
-    if game.status != _last_status and game.status == GameStatus.GOAL:
-        _on_goal()
-    _last_status = game.status
-    _camera.position = _player.position + Vector3.UP * EYE_HEIGHT
-    _camera.look_at(_camera.position + _player.aim())
+    request_move_input.rpc_id(1, input_vector)
     _shake_camera(delta)
-    var opponent_team := game.opponent_goal_of(_player.team).team
-    _hud.update_score(_player.team, game.score_of(_player.team), opponent_team, game.score_of(opponent_team))
-    _hud.update_time(game.remaining_time())
-    _show_message()
 
 func _on_player_kick() -> void:
-    _kick_view.kick()
+    _first_person_kick_view.kick()
     _shake = maxf(_shake, KICK_SHAKE)
 
-func _on_goal() -> void:
+func _on_goal(game_status: StringName, result: String) -> void:
     _sfx.play(Sfx.GOAL)
     _sfx.play(Sfx.BLIZZARD, -3.0)
     _shake = maxf(_shake, GOAL_SHAKE)
-    # 큰 글자가 튀어나오려면 글자가 먼저 들어가 있어야 합니다.
-    _show_message()
-    _hud.celebrate_goal()
+    _show_message(game_status, result)
+    _hud_view.celebrate_goal()
 
-# 카메라 위치는 그대로 두고 화면만 어긋나게(h_offset, v_offset) 흔듭니다.
 func _shake_camera(delta: float) -> void:
     _shake = move_toward(_shake, 0.0, _shake * SHAKE_DECAY * delta + 0.001)
     _camera.h_offset = randf_range(-1, 1) * _shake
     _camera.v_offset = randf_range(-1, 1) * _shake
 
-func _show_message() -> void:
-    match game.status:
+func _show_message(status: StringName, result: String) -> void:
+    match status:
         GameStatus.GOAL:
-            _hud.show_message("GOAL!")
+            _hud_view.show_message("GOAL!")
         GameStatus.OVER:
-            _hud.show_message(_result(), "R 키로 다시 시작")
+            _hud_view.show_message(result, "R 키로 다시 시작")
         _:
-            _hud.show_message("")
-
-func _result() -> String:
-    var winner := game.winner()
-    if winner == Character.NO_TEAM:
-        return "DRAW"
-    if winner == _player.team:
-        return "WIN"
-    return "LOSE"
+            _hud_view.show_message("")
