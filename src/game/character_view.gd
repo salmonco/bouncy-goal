@@ -34,7 +34,7 @@ const KICK_LEAN := 0.25
 const RANGE_ALPHA := 0.18
 const RANGE_SEGMENTS := 32
 
-var character: Character
+var _snapshot: Dictionary
 
 # 팀은 game.start() 때마다 다시 정해지므로, 바뀌면 다시 칠합니다.
 var _painted_team: int = Character.NO_TEAM
@@ -52,8 +52,11 @@ var _time := 0.0
 # 공 차기 동작이 시작된 뒤 지난 시간입니다. 음수면 차고 있지 않습니다.
 var _kick_time := -1.0
 
-func _init(_character: Character) -> void:
-    character = _character
+func render(snapshot: Dictionary) -> void:
+    _snapshot = snapshot
+
+func kick() -> void:
+    _kick_time = 0.0
 
 func _ready() -> void:
     var model: Node3D = MODEL.instantiate()
@@ -64,8 +67,7 @@ func _ready() -> void:
     for side in ["L", "R"]:
         _arms.append(model.find_child("Arm" + side, true, false))
         _legs.append(model.find_child("Leg" + side, true, false))
-    _last_position = character.position
-    character.bounced.connect(func(): _kick_time = 0.0)
+    _last_position = _snapshot.position
     for mesh_instance in model.find_children("*", "MeshInstance3D", true, false):
         _apply_toon(mesh_instance)
 
@@ -82,20 +84,20 @@ func _ready() -> void:
     _paint()
 
 func _process(delta: float) -> void:
-    if character.team != _painted_team:
+    if _snapshot.team != _painted_team:
         _paint()
-    position = character.position
-    if character.facing != Vector3.ZERO:
-        basis = Basis.looking_at(character.facing)
+    position = _snapshot.position
+    if _snapshot.facing != Vector3.ZERO:
+        basis = Basis.looking_at(_snapshot.facing)
     # 모델은 -Z 를 보므로, X 축으로 양수만큼 돌리면 고개를 듭니다.
-    _head.rotation.x = character.pitch
+    _head.rotation.x = _snapshot.pitch
     _animate(delta)
 
 func _animate(delta: float) -> void:
     _time += delta
-    var moved := character.position - _last_position
+    var moved := _snapshot.position as Vector3 - _last_position
     moved.y = 0
-    _last_position = character.position
+    _last_position = _snapshot.position
     # 리셋으로 순간 이동한 프레임은 걸음으로 치지 않습니다.
     var distance := moved.length() if moved.length() < Character.SPEED * 0.5 else 0.0
     var speed := distance / delta if delta > 0 else 0.0
@@ -163,8 +165,8 @@ func _front_half_disc(radius: float) -> ArrayMesh:
     return surface.commit()
 
 func _paint() -> void:
-    var color := TeamColors.of(character.team)
+    var color := TeamColors.of(_snapshot.team)
     if _team_material:
         _team_material.set_shader_parameter("albedo", color)
     _range_material.albedo_color = Color(color, RANGE_ALPHA)
-    _painted_team = character.team
+    _painted_team = _snapshot.team
