@@ -32,7 +32,9 @@ func on_peer_connected(id: int) -> void:
     waitings.append(character)
 
 func on_peer_disconnected(id: int) -> void:
-    characters.erase(character_of(id))
+    var player := character_of(id)
+    characters.erase(player)
+    waitings.erase(player)
 
 @rpc("any_peer", "call_remote", "reliable")
 func request_game_start() -> void:
