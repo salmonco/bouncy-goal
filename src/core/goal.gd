@@ -15,3 +15,10 @@ func _init(_position: Vector3, _team: int = Character.NO_TEAM) -> void:
 
 func reset() -> void:
     score = 0
+
+func snapshot() -> Dictionary:
+    return {
+        "position": position,
+        "score": score,
+        "team": team
+    }
