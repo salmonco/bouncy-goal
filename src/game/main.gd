@@ -78,7 +78,7 @@ func game_started(snapshot: Dictionary) -> void:
         var character_view := CharacterView.new()
         character_view.render(character)
         # 1인칭이라 내 캐릭터는 카메라를 가리지 않게 숨깁니다.
-        character_view.visible = character.peer_id != peer_id
+        character_view.visible = character.peer_id != multiplayer.get_unique_id()
         add_child(character_view)
         _character_views[character.peer_id] = character_view
     _ball_view = BallView.new()
