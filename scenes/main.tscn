@@ -1,3 +1,59 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://hoss3y3bul2o"]
 
-[node name="Main" type="Node3D"]
+[ext_resource type="Script" uid="uid://ifr2y5ggcohf" path="res://src/game/main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://dmvu1rhher2od" path="res://src/game/planet_view.gd" id="2_planet"]
+[ext_resource type="Script" uid="uid://bsh3wg500ucu2" path="res://src/game/field_view.gd" id="3_field"]
+[ext_resource type="Script" uid="uid://b45aaxvj2v1co" path="res://src/game/field_walls_view.gd" id="4_walls"]
+[ext_resource type="Script" uid="uid://8whbsio3jtdn" path="res://src/game/hud_view.gd" id="5_hud"]
+[ext_resource type="Script" uid="uid://nxrs736h3jni" path="res://src/game/first_person_kick_view.gd" id="6_kick"]
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMaterial_pastel"]
+sky_top_color = Color(0.55, 0.72, 0.95, 1)
+sky_horizon_color = Color(0.93, 0.85, 0.95, 1)
+ground_bottom_color = Color(0.85, 0.88, 0.98, 1)
+ground_horizon_color = Color(0.93, 0.85, 0.95, 1)
+sun_angle_max = 10.0
+
+[sub_resource type="Sky" id="Sky_pastel"]
+sky_material = SubResource("SkyMaterial_pastel")
+
+[sub_resource type="Environment" id="Environment_sky"]
+background_mode = 2
+sky = SubResource("Sky_pastel")
+ambient_light_source = 2
+ambient_light_color = Color(0.92, 0.95, 1, 1)
+ambient_light_energy = 0.55
+
+[node name="Main" type="Node3D" unique_id=1305998170]
+script = ExtResource("1_main")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1432107783]
+environment = SubResource("Environment_sky")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=817299910]
+shadow_enabled = true
+directional_shadow_max_distance = 4000.0
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1189206627]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1600, 1800)
+fov = 45.0
+far = 6000.0
+
+[node name="FirstPersonKickView" type="Node3D" parent="Camera3D"]
+script = ExtResource("6_kick")
+
+[node name="PlanetView" type="Node3D" parent="."]
+visible = false
+script = ExtResource("2_planet")
+
+[node name="FieldView" type="Node3D" parent="."]
+visible = false
+script = ExtResource("3_field")
+
+[node name="FieldWallsView" type="Node3D" parent="."]
+visible = false
+script = ExtResource("4_walls")
+
+[node name="HudView" type="CanvasLayer" parent="."]
+visible = false
+script = ExtResource("5_hud")
