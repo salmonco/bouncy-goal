@@ -32,6 +32,7 @@ func on_peer_connected(id: int) -> void:
     var character := Character.new(Vector3.ZERO, Vector3.FORWARD, id)
     characters.append(character)
     waitings.append(character)
+    _match_waitings()
 
 func on_peer_disconnected(id: int) -> void:
     var game := game_of(id)
@@ -46,15 +47,7 @@ func on_peer_disconnected(id: int) -> void:
         game.characters.erase(player)
     characters.erase(player)
     waitings.erase(player)
-
-@rpc("any_peer", "call_remote", "reliable")
-func request_game_start() -> void:
-    if not _can_start_game():
-        return
-    var game := game_of(multiplayer.get_remote_sender_id())
-    game.start()
-    for player in game.characters:
-        game_started.rpc_id(player.peer_id, game.snapshot(player.peer_id))
+    _match_waitings()
 
 @rpc("any_peer", "call_remote", "reliable")
 func request_game_restart() -> void:
@@ -116,12 +109,13 @@ func game_of(peer_id: int) -> Game:
             return game
     return null
 
-func _can_start_game() -> bool:
-    if waitings.size() < MAX_PLAYERS_IN_BATTLE:
-        return false
-    var players: Array[Character] = []
-    for i in range(MAX_PLAYERS_IN_BATTLE):
-        players.append(waitings.pop_front())
-    var game := Game.new(players)
-    games.append(game)
-    return true
+func _match_waitings() -> void:
+    while waitings.size() >= MAX_PLAYERS_IN_BATTLE:
+        var players: Array[Character] = []
+        for i in range(MAX_PLAYERS_IN_BATTLE):
+            players.append(waitings.pop_front())
+        var game := Game.new(players)
+        games.append(game)
+        game.start()
+        for player in game.characters:
+            game_started.rpc_id(player.peer_id, game.snapshot(player.peer_id))

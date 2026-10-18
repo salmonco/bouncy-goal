@@ -39,11 +39,6 @@ func _create_peer() -> void:
 func on_connected_to_server() -> void:
     peer_id = multiplayer.get_unique_id()
     _show_waiting("상대를 기다리는 중")
-    request_game_start.rpc_id(1)
-
-@rpc("any_peer", "call_remote", "reliable")
-func request_game_start() -> void:
-    pass
 
 @rpc("any_peer", "call_remote", "reliable")
 func request_game_restart() -> void:
