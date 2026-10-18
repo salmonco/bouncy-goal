@@ -102,16 +102,16 @@ func _kickoff() -> void:
     status = GameStatus.PLAYING
 
 func goal_of(team: int) -> Goal:
-    for goal in goals:
-        if goal.team == team:
-            return goal
-    return null
+    var my := goals.filter(func(g: Goal): return g.team == team)
+    if my.size() == 0:
+        return null
+    return my[0]
 
 func opponent_goal_of(team: int) -> Goal:
-    for goal in goals:
-        if goal.team != team:
-            return goal
-    return null
+    var opponent := goals.filter(func(g: Goal): return g.team != team)
+    if opponent.size() == 0:
+        return null
+    return opponent[0]
 
 func is_goal() -> bool:
     return _is_forward_goal() or _is_back_goal()
@@ -141,9 +141,47 @@ func score_of(team: int) -> int:
 func winner() -> int:
     if status != GameStatus.OVER:
         return Character.NO_TEAM
-    var teams := goals.map(func(g: Goal): return g.team)
-    var max_score: int = teams.map(func(team: int): return score_of(team)).max()
-    var leaders := teams.filter(func(team: int): return score_of(team) == max_score)
+    var max_score: int = _teams().map(func(team: int): return score_of(team)).max()
+    var leaders := _teams().filter(func(team: int): return score_of(team) == max_score)
     if leaders.size() > 1:
         return Character.NO_TEAM
     return leaders[0]
+
+func character_of(peer_id: int) -> Character:
+    for character in characters:
+        if character.peer_id == peer_id:
+            return character
+    return null
+
+func _result(peer_id: int) -> String:
+    if winner() == Character.NO_TEAM:
+        return "DRAW"
+    if winner() == character_of(peer_id).team:
+        return "WIN"
+    return "LOSE"
+
+func _teams() -> Array[int]:
+    return goals.map(func(g: Goal): return g.team)
+
+func _my_team(peer_id: int) -> int:
+    return character_of(peer_id).team
+
+func _opponent_team(peer_id: int) -> int:
+    var opponent := _teams().filter(func(t: int): return t != _my_team(peer_id))
+    if opponent.size() == 0:
+        return -1
+    return opponent[0]
+
+func snapshot(peer_id: int) -> Dictionary:
+    return {
+        "goals": goals.map((func(g: Goal): return g.snapshot())),
+        "player": character_of(peer_id).snapshot(),
+        "characters": characters.map(func(c: Character): return c.snapshot()),
+        "ball": ball.snapshot(),
+        "status": status,
+        "result": _result(peer_id),
+        "score": score_of(_my_team(peer_id)),
+        "opponent_team": _opponent_team(peer_id),
+        "opponent_score": score_of(_opponent_team(peer_id)),
+        "remaining_time": remaining_time()
+    }

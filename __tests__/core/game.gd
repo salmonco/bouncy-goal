@@ -569,3 +569,10 @@ func test_공이_크로스바_위로_날아오면_뒤_벽에도_튕긴다() -> v
     game.tick(0.1)
     assert_float(game.ball.velocity.z).is_less(0)
     assert_float(game.ball.position.z).is_less_equal(Game.FIELD_LENGTH / 2 - Ball.RADIUS)
+
+func test_게임_스냅샷에_모든_캐릭터가_들어간다() -> void:
+    var characters: Array[Character] = [Character.new(Vector3.ZERO, Vector3.FORWARD, 5), Character.new(Vector3.ZERO, Vector3.FORWARD, 6)]
+    var game := Game.new(characters)
+    game.start()
+    var peer_ids: Array = game.snapshot(5).characters.map(func(c: Dictionary): return c.peer_id)
+    assert_array(peer_ids).contains_exactly([5, 6])
