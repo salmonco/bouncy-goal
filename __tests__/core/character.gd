@@ -247,3 +247,7 @@ func test_캐릭터가_공을_튀기지_못하면_신호를_보내지_않는다(
     character.bounced.connect(func(): emitted[0] = true)
     character.bounce(ball)
     assert_bool(emitted[0]).is_false()
+
+func test_캐릭터_스냅샷에_피어_아이디가_들어간다() -> void:
+    var character := Character.new(Vector3.ZERO, Vector3.FORWARD, 7)
+    assert_int(character.snapshot().peer_id).is_equal(7)

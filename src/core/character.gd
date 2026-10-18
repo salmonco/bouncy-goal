@@ -9,6 +9,8 @@ const MAX_PITCH := deg_to_rad(60)
 const SPEED := 250.0
 const NO_TEAM := -1
 
+var peer_id: int
+
 signal bounced
 
 var position: Vector3
@@ -21,11 +23,12 @@ var team: int = NO_TEAM
 var _start_position: Vector3
 var _start_facing: Vector3
 
-func _init(_position = Vector3.ZERO, _facing = Vector3.FORWARD) -> void:
+func _init(_position = Vector3.ZERO, _facing = Vector3.FORWARD, _peer_id: int = 0) -> void:
     position = _position
     facing = _facing
     _start_position = _position
     _start_facing = _facing
+    peer_id = _peer_id
 
 func bounce(ball: Ball) -> bool:
     var to_ball := ball.position - position
@@ -65,3 +68,13 @@ func tilt(angle: float) -> void:
 func aim() -> Vector3:
     var right := facing.cross(Vector3.UP).normalized()
     return facing.rotated(right, pitch)
+
+func snapshot() -> Dictionary:
+    return {
+        "peer_id": peer_id,
+        "position": position,
+        "facing": facing,
+        "pitch": pitch,
+        "team": team,
+        "aim": aim()
+    }
