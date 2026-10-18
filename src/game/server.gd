@@ -34,7 +34,12 @@ func on_peer_connected(id: int) -> void:
     waitings.append(character)
 
 func on_peer_disconnected(id: int) -> void:
+    var game := game_of(id)
     var player := character_of(id)
+    if game.characters.size() == 2:
+        games.erase(game)
+    else:
+        game.characters.erase(player)
     characters.erase(player)
     waitings.erase(player)
 
