@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# build-client 단축 실행기. bin/build-client.sh 로 그대로 넘깁니다.
+#
+#   ./build-client            # 테스트 후 macOS·Windows 배포용 zip 을 build/ 에
+#   ./build-client windows    # 한 플랫폼만
+#   ./build-client -s         # 테스트 건너뛰기
+#   ./build-client -h         # 사용법
+exec "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/bin/build-client.sh" "$@"
