@@ -42,6 +42,14 @@ var _last_velocity: Vector3
 func render(snapshot: Dictionary) -> void:
     _snapshot = snapshot
 
+# 코어는 땅에 떨어지면 위아래 속도를 뒤집으므로, 떨어지던 공이 땅에서 위로 바뀐 것으로 알아냅니다.
+# 그려지는 공은 보간되어 땅에 정확히 닿는 순간이 없을 수 있으므로, 서버가 보낸 스냅샷을 차례로 받아 판정합니다.
+func detect_landing(snapshot: Dictionary) -> void:
+    var falling_speed := -_last_velocity.y
+    _last_velocity = snapshot.velocity
+    if falling_speed > LANDING_MIN_SPEED and snapshot.velocity.y >= 0.0 and snapshot.position.y <= 0.01:
+        landed.emit(snapshot.position + Vector3.UP * Ball.RADIUS)
+
 func _ready() -> void:
     _body = Shapes.mesh(_snowball_mesh(), SNOW_COLOR, Shapes.outline_material(SNOW_OUTLINE_COLOR, SNOW_OUTLINE_WIDTH))
     (_body.material_override as ShaderMaterial).set_shader_parameter("shade_color", SNOW_SHADE_COLOR)
@@ -60,18 +68,10 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
     position = _snapshot.position
     _roll()
-    _detect_landing()
     # 공을 따라 함께 뜨지 않도록, 공의 높이만큼 도로 내려 바닥에 붙입니다.
     _marker.position.y = MARKER_HEIGHT - _snapshot.position.y
     var shrink := lerpf(1.0, MARKER_MIN_SCALE, clampf(_snapshot.position.y / MARKER_SHRINK_HEIGHT, 0.0, 1.0))
     _marker.scale = Vector3(shrink, MARKER_FLATNESS, shrink)
-
-# 코어는 땅에 떨어지면 위아래 속도를 뒤집으므로, 떨어지던 공이 땅에서 위로 바뀐 것으로 알아냅니다.
-func _detect_landing() -> void:
-    var falling_speed := -_last_velocity.y
-    _last_velocity = _snapshot.velocity
-    if falling_speed > LANDING_MIN_SPEED and _snapshot.velocity.y >= 0.0 and _snapshot.position.y <= 0.01:
-        landed.emit(_snapshot.position + Vector3.UP * Ball.RADIUS)
 
 # 수평으로 굴러간 거리만큼, 진행 방향에 수직인 축으로 공을 돌립니다(거리 = 반지름 × 각도).
 func _roll() -> void:

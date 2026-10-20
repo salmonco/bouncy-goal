@@ -1,7 +1,7 @@
 class_name Server
 extends Node3D
 
-const PORT := 8080
+const PORT := 8081
 const MAX_CLIENTS := 32
 
 const MAX_PLAYERS_IN_BATTLE := 2
@@ -15,11 +15,11 @@ func _ready() -> void:
     multiplayer.peer_connected.connect(on_peer_connected)
     multiplayer.peer_disconnected.connect(on_peer_disconnected)
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
     for game in games:
         game.tick(delta)
         for character in game.characters:
-            screen_changed.rpc_id(character.peer_id, game.snapshot(character.peer_id))
+            screen_changed.rpc_id(character.peer_id, _snapshot_of(game, character.peer_id))
 
 func _create_peer() -> void:
     var peer := ENetMultiplayerPeer.new()
@@ -118,4 +118,10 @@ func _match_waitings() -> void:
         games.append(game)
         game.start()
         for player in game.characters:
-            game_started.rpc_id(player.peer_id, game.snapshot(player.peer_id))
+            game_started.rpc_id(player.peer_id, _snapshot_of(game, player.peer_id))
+
+# 클라이언트가 스냅샷을 도착 시각이 아니라 만들어진 시점(틱) 기준으로 보간하도록 틱 번호를 붙입니다.
+func _snapshot_of(game: Game, peer_id: int) -> Dictionary:
+    var snapshot := game.snapshot(peer_id)
+    snapshot["tick"] = Engine.get_physics_frames()
+    return snapshot
