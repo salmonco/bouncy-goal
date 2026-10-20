@@ -1,7 +1,7 @@
 class_name Server
 extends Node3D
 
-const PORT := 8080
+const PORT := 8081
 const MAX_CLIENTS := 32
 
 const MAX_PLAYERS_IN_BATTLE := 2

@@ -8,8 +8,6 @@ extends Node3D
 @onready var _hud_view: HudView = $HudView
 @onready var _first_person_kick_view: FirstPersonKickView = $Camera3D/FirstPersonKickView
 
-const ADDRESS := "localhost"
-
 const MOUSE_SENSITIVITY := 0.003
 const EYE_HEIGHT := 40.0
 
@@ -48,7 +46,8 @@ func _ready() -> void:
 
 func _create_peer() -> void:
     var peer := ENetMultiplayerPeer.new()
-    peer.create_client(ADDRESS, Server.PORT)
+    var address: String = ProjectSettings.get_setting_with_override("network/server_address")
+    peer.create_client(address, Server.PORT)
     multiplayer.multiplayer_peer = peer
 
 func on_connected_to_server() -> void:
