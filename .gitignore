@@ -1,3 +1,15 @@
 .godot/
 .omc/
 reports/
+
+# video
+*.mp4
+
+# build
+/build/
+
+# 배포 접속 정보 (bin/deploy-server.sh)
+.deploy-server.env
+
+# macOS
+.DS_Store

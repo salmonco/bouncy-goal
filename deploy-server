@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# deploy-server 단축 실행기. bin/deploy-server.sh 로 그대로 넘깁니다.
+#
+#   ./deploy-server             # build/server/ 의 것을 업로드 → 재시작 → 확인 (빌드는 안 함)
+#   ./deploy-server --install   # 처음 한 번: systemd 유닛까지 설치
+#   ./deploy-server -h          # 사용법
+#
+#   보통은  ./build-server && ./deploy-server
+exec "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/bin/deploy-server.sh" "$@"
