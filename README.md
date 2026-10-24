@@ -1,5 +1,7 @@
 # Bouncy Goal (탱탱볼 튀기기)
 
+![Bouncy Goal](promo/cover.png)
+
 ## 제작 배경
 
 - 추석에 수박게임을 하던 중 탱탱볼로 만들 수 있는 게임을 떠올리다,
